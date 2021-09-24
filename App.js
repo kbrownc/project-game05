@@ -7,7 +7,6 @@ import {
   Dimensions,
   TouchableHighlight,
   Button,
-  Image,
   TextInput,
 } from 'react-native';
 import { newBoard } from './newboard.js';
@@ -26,7 +25,7 @@ export default function App() {
     },
     setGameState,
   ] = useState({
-    letter1: 'Q',
+    letter1: '',
     letter2: '',
     message: 'Enter 1st word',
     score: 0,
@@ -37,22 +36,21 @@ export default function App() {
 
   // render board
   const renderBoard = ({ item }) => {
-    if (item.key === 35) {
-    item.name = letter;
-  }
-  if (item.key === 37) {
-    item.name = letter1;
-  }
-    if (item.name === 'D') {
-      return <Text style={styles.itemAbout}>{item.aboutText}</Text>;
-    } else  {
-      return (
-        <View style={styles.item}>
-          <Text style={styles.itemText}>{item.name}</Text>
-        </View>
-      );
-    }
+    if (item.key === 35) { item.name = letter1; }
+    if (item.key === 43) { item.name = letter2; }
+    return (
+      <View style={styles.item}>
+        <TouchableHighlight onPress={() => pressCell(item.key)} underlayColor='red'>
+            <Text style={styles.itemText}>{item.name}</Text>
+        </TouchableHighlight>
+      </View>
+    );
   };
+
+  // Pressed a cell on Board 
+  const pressCell = (key) => {
+    console.log('pressCell',key);
+  }
 
   // press Reset button
   const pressReset = useCallback(() => {
@@ -60,7 +58,7 @@ export default function App() {
       return {
         letter1: '',
         letter2: '',
-        message: 'Play',
+        message: 'Reset Pressed',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
         endOfGame: false,
@@ -71,22 +69,31 @@ export default function App() {
   // enter Letter button
   const enterLetter = useCallback((val) => {
     setGameState(prevGameState => {
-      let workMessage = 'letter entered';
-      let workLetter1 = val;
+      let workLetter1 = prevGameState.letter1;
+      let workLetter2 = prevGameState.letter2;
+      let workMessage = '';
+      if (letter1 === '') {
+        workLetter1 = val;
+        workMessage = 'letter 1 entered';
+      } else {
+        workLetter2 = val;
+        workMessage = 'letter 2 entered';
+      }
       return {
         ...prevGameState,
         letter1: workLetter1,
+        letter2: workLetter2,
         message: workMessage,
       };
     });
-  }, [letter1]);
+  }, [letter1, letter2]);
 
   // press PLAY button
   const pressPlay = useCallback(() => {
     setGameState(prevGameState => {
       let workBoard = prevGameState.board.slice();
-      let workLetter1 = 'W';
-      let workLetter2 = 'X';
+      let workLetter1 = '';
+      let workLetter2 = '';
       let workMessage = 'Play button';
       let workEndOfGame = false;
       let scoreAdj = 1;
@@ -117,7 +124,7 @@ export default function App() {
         <View style={endOfGame ? styles.itemInvisible : null}>
           <Button
             onPress={pressPlay}
-            title="Play"
+            title="Done"
             color="blue"
             disabled={endOfGame ? true : false}
           />
@@ -135,11 +142,13 @@ export default function App() {
         </View>
       </View>
       <TextInput style={styles.input} 
-        onChangeText={(val) => setLetter(val)} 
+        onChangeText={(val) => enterLetter(val)} 
+        autoCapitalze="characters"
         maxLength={1}
       />
       <TextInput style={styles.input} 
         onChangeText={(val) => enterLetter(val)} 
+        autoCapitalze="characters"
         maxLength={1}
       />
       <View style={styles.board}>
