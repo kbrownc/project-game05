@@ -6,6 +6,8 @@ import {
   FlatList,
   Dimensions,
   TouchableHighlight,
+  TouchableWithoutFeedback,
+  Keyboard,
   Button,
   TextInput,
 } from 'react-native';
@@ -36,8 +38,6 @@ export default function App() {
 
   // render board
   const renderBoard = ({ item }) => {
-    if (item.key === 35) { item.name = letter1; }
-    if (item.key === 43) { item.name = letter2; }
     return (
       <View style={styles.item}>
         <TouchableHighlight onPress={() => pressCell(item.key)} underlayColor='red'>
@@ -47,10 +47,20 @@ export default function App() {
     );
   };
 
-  // Pressed a cell on Board 
-  const pressCell = (key) => {
-    console.log('pressCell',key);
-  }
+// Pressed a cell on the board
+  const pressCell = useCallback((key) => {
+    setGameState(prevGameState => {
+      let workBoard = prevGameState.board.slice();
+      let workMessage = 'Pressed a cell';
+      workBoard[key - 1].name = letter1;
+      workBoard[key + 7].name = letter2;
+      return {
+        ...prevGameState,
+        message: workMessage,
+        board: workBoard,
+      };
+    });
+  }, [letter1, letter2]);
 
   // press Reset button
   const pressReset = useCallback(() => {
@@ -66,7 +76,7 @@ export default function App() {
     });
   }, []);
 
-  // enter Letter button
+  // enter Letter
   const enterLetter = useCallback((val) => {
     setGameState(prevGameState => {
       let workLetter1 = prevGameState.letter1;
@@ -114,6 +124,7 @@ export default function App() {
 
   // render
   return (
+    <TouchableWithoutFeedback onPress={ () => {Keyboard.dismiss()}}>
     <View style={styles.container}>
       <View style={styles.nav}>
         <Button
@@ -155,6 +166,7 @@ export default function App() {
         <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} />
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -215,16 +227,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  messageRow2: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    flexDirection: 'row',
-    color: 'black',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: 'yellow',
   },
   board: {
     flex: 7,
