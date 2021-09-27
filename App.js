@@ -11,9 +11,22 @@ import {
   Button,
   TextInput,
 } from 'react-native';
-import { newBoard } from './newboard.js';
 
 const numColumns = 8;
+const numRows = 8;
+const newBoard = [];
+let i;
+for (i = 0; i < (numColumns * numRows) + 1 ; i++) {
+  if (i === 27) {
+    newBoard[i] = {key: i+1, name: 'C'};
+  } else if (i === 28) {
+    newBoard[i] = {key: i+1, name: 'A'};
+  } else if (i === 29) {
+    newBoard[i] = {key: i+1, name: 'T'};
+  } else {
+    newBoard[i] = {key: i+1, name: ' '};
+  }
+};
 
 export default function App() {
   const [
@@ -34,28 +47,37 @@ export default function App() {
     board: JSON.parse(JSON.stringify(newBoard)),
     endOfGame: false,
   });
-  const [letter, setLetter] = useState('');
 
   // render board
   const renderBoard = ({ item }) => {
     return (
       <View style={styles.item}>
-        <TouchableHighlight onPress={() => pressCell(item.key)} underlayColor='red'>
+        <TouchableHighlight onPress={() => pressCell(item.key)} underlayColor='red'
+            disabled={item.name === ' ' ? false : true}>
             <Text style={styles.itemText}>{item.name}</Text>
         </TouchableHighlight>
       </View>
     );
   };
 
-// Pressed a cell on the board
+// Select a cell on the board
   const pressCell = useCallback((key) => {
     setGameState(prevGameState => {
       let workBoard = prevGameState.board.slice();
+      let workLetter1 = prevGameState.letter1;
+      let workLetter2 = prevGameState.letter2;
       let workMessage = 'Pressed a cell';
-      workBoard[key - 1].name = letter1;
-      workBoard[key + 7].name = letter2;
+      if (letter1 !== '') {
+        workBoard[key - 1].name = letter1;
+        workLetter1 = '';
+      } else if (letter2 !== '') {
+        workBoard[key - 1].name = letter2;
+        workLetter2 = '';
+      }
       return {
         ...prevGameState,
+        letter1: workLetter1,
+        letter2: workLetter2,
         message: workMessage,
         board: workBoard,
       };
@@ -76,7 +98,7 @@ export default function App() {
     });
   }, []);
 
-  // enter Letter
+  // enter a Letter from keyboard
   const enterLetter = useCallback((val) => {
     setGameState(prevGameState => {
       let workLetter1 = prevGameState.letter1;
@@ -98,13 +120,14 @@ export default function App() {
     });
   }, [letter1, letter2]);
 
-  // press PLAY button
-  const pressPlay = useCallback(() => {
+  // press DONE entering the letters button
+  //    Need to validate entry of letters (spelling and duplicates)
+  //    Neeed to check if we are at end of game
+  //    Need to update score
+  const pressDone = useCallback(() => {
     setGameState(prevGameState => {
       let workBoard = prevGameState.board.slice();
-      let workLetter1 = '';
-      let workLetter2 = '';
-      let workMessage = 'Play button';
+      let workMessage = 'Done button';
       let workEndOfGame = false;
       let scoreAdj = 1;
       // Check for end of Game
@@ -112,8 +135,7 @@ export default function App() {
         workMessage = 'Game Complete';
       }
       return {
-        letter1: '',
-        letter2: '',
+        ...prevGameState,
         message: workMessage,
         score: prevGameState.score + scoreAdj,
         board: workBoard,
@@ -134,7 +156,7 @@ export default function App() {
         />
         <View style={endOfGame ? styles.itemInvisible : null}>
           <Button
-            onPress={pressPlay}
+            onPress={pressDone}
             title="Done"
             color="blue"
             disabled={endOfGame ? true : false}
@@ -152,16 +174,22 @@ export default function App() {
           <Text style={styles.message}>{message}</Text>
         </View>
       </View>
+      <View style={styles.nav}>
+        <TextInput style={styles.input} 
+          onChangeText={(val) => enterLetter(val)} 
+          autoCapitalze="characters"
+          maxLength={1}
+        />
+      <Text>Enter first Letter</Text>
+      </View>
+      <View style={styles.nav}>
       <TextInput style={styles.input} 
         onChangeText={(val) => enterLetter(val)} 
         autoCapitalze="characters"
         maxLength={1}
       />
-      <TextInput style={styles.input} 
-        onChangeText={(val) => enterLetter(val)} 
-        autoCapitalze="characters"
-        maxLength={1}
-      />
+      <Text>Enter second Letter</Text>
+      </View>
       <View style={styles.board}>
         <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} />
       </View>
