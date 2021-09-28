@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   Dimensions,
+  TouchableHighlight,
   TouchableWithoutFeedback,
   Keyboard,
   Button,
@@ -13,16 +14,15 @@ import {
 
 const numColumns = 8;
 const numRows = 8;
-
 const newBoard = [];
 let i;
-for (i = 0; i < (numColumns * numRows) ; i++) {
+for (i = 0; i < (numColumns * numRows) + 1 ; i++) {
   if (i === 1) {
-    newBoard[i] = {key: 2, name: 'C'};
+    newBoard[i] = {key: i+1, name: 'C'};
   } else if (i === 2) {
-    newBoard[i] = {key: 3, name: 'A'};
+    newBoard[i] = {key: i+1, name: 'A'};
   } else if (i === 3) {
-    newBoard[i] = {key: 4, name: 'T'};
+    newBoard[i] = {key: i+1, name: 'T'};
   } else {
     newBoard[i] = {key: i+1, name: ' '};
   }
@@ -50,12 +50,10 @@ export default function App() {
   const renderBoard = ({ item }) => {
     return (
       <View style={styles.item}>
-        <TextInput style={styles.itemText} 
-          onChangeText={(value) => enterLetter(value,item.key)} 
-          autoCapitalze="characters"
-          maxLength={1}
-          editable={item.name === ' ' ? true : false}
-        />
+        <TouchableHighlight onPress={() => pressCell(item.key)} underlayColor='red'
+            disabled={item.name === ' ' ? false : true}>
+            <Text style={styles.itemText}>{item.name}</Text>
+        </TouchableHighlight>
       </View>
     );
   };
@@ -75,6 +73,25 @@ export default function App() {
     return (wordCount);
   };
 
+  // Select a cell on the board
+  const pressCell = useCallback((key) => {
+    setGameState(prevGameState => {
+      let workBoard = prevGameState.board.slice();
+      let workLetter = prevGameState.letter;
+      let workMessage = 'Pressed a cell';
+      if (letter !== '') {
+        workBoard[key - 1].name = letter;
+        workLetter = '';
+      }
+      return {
+        ...prevGameState,
+        letter: workLetter,
+        message: workMessage,
+        board: workBoard,
+      };
+    });
+  }, [letter]);
+
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
@@ -89,18 +106,21 @@ export default function App() {
   }, []);
 
   // enter a Letter from keyboard
-  const enterLetter = useCallback((value,key) => {
+  const enterLetter = useCallback((val) => {
     setGameState(prevGameState => {
-      let workBoard = prevGameState.board.slice();
-      let workMessage = 'Letter entered';
-      workBoard[key - 1].name = value;
+      let workLetter = prevGameState.letter;
+      let workMessage = '';
+      if (letter === '') {
+        workLetter = val;
+        workMessage = 'letter entered';
+      }
       return {
         ...prevGameState,
-        board: workBoard,
+        letter: workLetter,
         message: workMessage,
       };
     });
-  }, []);
+  }, [letter]);
 
   // press DONE entering the letters button
   //    Need to validate entry of letters (spelling and duplicates)
@@ -155,8 +175,16 @@ export default function App() {
           <Text style={styles.message}>{message}</Text>
         </View>
       </View>
+      <View style={styles.nav}>
+        <TextInput style={styles.input} 
+          onChangeText={(val) => enterLetter(val)} 
+          autoCapitalze="characters"
+          maxLength={1}
+        />
+      <Text>Enter Letter</Text>
+      </View>
       <View style={styles.board}>
-        <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} removeClippedSubviews={false} />
+        <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} />
       </View>
     </View>
     </TouchableWithoutFeedback>
@@ -181,7 +209,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 2,
     fontSize: 20,
-    fontWeight: 'bold',
   },
   item: {
     backgroundColor: 'green',
