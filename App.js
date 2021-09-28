@@ -17,11 +17,11 @@ const numRows = 8;
 const newBoard = [];
 let i;
 for (i = 0; i < (numColumns * numRows) + 1 ; i++) {
-  if (i === 27) {
+  if (i === 1) {
     newBoard[i] = {key: i+1, name: 'C'};
-  } else if (i === 28) {
+  } else if (i === 2) {
     newBoard[i] = {key: i+1, name: 'A'};
-  } else if (i === 29) {
+  } else if (i === 3) {
     newBoard[i] = {key: i+1, name: 'T'};
   } else {
     newBoard[i] = {key: i+1, name: ' '};
@@ -31,8 +31,7 @@ for (i = 0; i < (numColumns * numRows) + 1 ; i++) {
 export default function App() {
   const [
     {
-      letter1,
-      letter2,
+      letter,
       message,
       score,
       board,
@@ -40,8 +39,7 @@ export default function App() {
     },
     setGameState,
   ] = useState({
-    letter1: '',
-    letter2: '',
+    letter: '',
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
@@ -60,36 +58,45 @@ export default function App() {
     );
   };
 
-// Select a cell on the board
+  // Count the no. of words on board
+  const countBoard = () => {
+    let wordCount = 0;
+    // Count words on rows
+    let i;
+    for (i = 0; i < (numColumns - 3) ; i++) {
+      if (board[i].name !== ' ' &&
+        board[i + 1].name !== ' ' &&
+        board[i + 2].name !== ' ') {
+      wordCount = wordCount + 1;
+      }
+    }
+    return (wordCount);
+  };
+
+  // Select a cell on the board
   const pressCell = useCallback((key) => {
     setGameState(prevGameState => {
       let workBoard = prevGameState.board.slice();
-      let workLetter1 = prevGameState.letter1;
-      let workLetter2 = prevGameState.letter2;
+      let workLetter = prevGameState.letter;
       let workMessage = 'Pressed a cell';
-      if (letter1 !== '') {
-        workBoard[key - 1].name = letter1;
-        workLetter1 = '';
-      } else if (letter2 !== '') {
-        workBoard[key - 1].name = letter2;
-        workLetter2 = '';
+      if (letter !== '') {
+        workBoard[key - 1].name = letter;
+        workLetter = '';
       }
       return {
         ...prevGameState,
-        letter1: workLetter1,
-        letter2: workLetter2,
+        letter: workLetter,
         message: workMessage,
         board: workBoard,
       };
     });
-  }, [letter1, letter2]);
+  }, [letter]);
 
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
       return {
-        letter1: '',
-        letter2: '',
+        letter: '',
         message: 'Reset Pressed',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
@@ -101,24 +108,19 @@ export default function App() {
   // enter a Letter from keyboard
   const enterLetter = useCallback((val) => {
     setGameState(prevGameState => {
-      let workLetter1 = prevGameState.letter1;
-      let workLetter2 = prevGameState.letter2;
+      let workLetter = prevGameState.letter;
       let workMessage = '';
-      if (letter1 === '') {
-        workLetter1 = val;
-        workMessage = 'letter 1 entered';
-      } else {
-        workLetter2 = val;
-        workMessage = 'letter 2 entered';
+      if (letter === '') {
+        workLetter = val;
+        workMessage = 'letter entered';
       }
       return {
         ...prevGameState,
-        letter1: workLetter1,
-        letter2: workLetter2,
+        letter: workLetter,
         message: workMessage,
       };
     });
-  }, [letter1, letter2]);
+  }, [letter]);
 
   // press DONE entering the letters button
   //    Need to validate entry of letters (spelling and duplicates)
@@ -129,7 +131,6 @@ export default function App() {
       let workBoard = prevGameState.board.slice();
       let workMessage = 'Done button';
       let workEndOfGame = false;
-      let scoreAdj = 1;
       // Check for end of Game
       if (endOfGame) {
         workMessage = 'Game Complete';
@@ -137,7 +138,7 @@ export default function App() {
       return {
         ...prevGameState,
         message: workMessage,
-        score: prevGameState.score + scoreAdj,
+        score: countBoard(),
         board: workBoard,
         endOfGame: workEndOfGame,
       };
@@ -180,15 +181,7 @@ export default function App() {
           autoCapitalze="characters"
           maxLength={1}
         />
-      <Text>Enter first Letter</Text>
-      </View>
-      <View style={styles.nav}>
-      <TextInput style={styles.input} 
-        onChangeText={(val) => enterLetter(val)} 
-        autoCapitalze="characters"
-        maxLength={1}
-      />
-      <Text>Enter second Letter</Text>
+      <Text>Enter Letter</Text>
       </View>
       <View style={styles.board}>
         <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} />
