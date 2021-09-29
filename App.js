@@ -14,6 +14,9 @@ import {
 const numColumns = 8;
 const numRows = 8;
 
+// This has not been incorporated yet
+const wordLength = 3;
+
 const newBoard = [];
 let i;
 for (i = 0; i < (numColumns * numRows) ; i++) {
@@ -63,15 +66,46 @@ export default function App() {
   // Count the no. of words on board
   const countBoard = () => {
     let wordCount = 0;
+    let word = '';
+    let wordList = {};
     // Count words on rows
     let i;
-    for (i = 0; i < (numColumns - 3) ; i++) {
-      if (board[i].name !== ' ' &&
-        board[i + 1].name !== ' ' &&
-        board[i + 2].name !== ' ') {
-      wordCount = wordCount + 1;
+    let j;
+    for (j = 0; j < numRows ; j++) {
+      for (i = j * numRows; i < ((j + 1) * numColumns - 2) ; i++) {
+        if (board[i].name !== ' ' &&
+          board[i + 1].name !== ' ' &&
+          board[i + 2].name !== ' ') {
+        wordCount = wordCount + 1;
+        word = (board[i].name) + (board[i + 1].name) + (board[i + 2].name); 
+        console.log('* row word',word);
+        if (wordList[word] === undefined) {
+          wordList[word] = 1;
+        } else {
+          console.log('Duplicate word',word);
+        }
+        }
       }
     }
+    // Count words on columns
+    for (j = 0; j < numColumns ; j++) {
+      for (i = 0; i < (numRows - 2) ; i++) {
+        if (board[i * numColumns + j].name !== ' ' &&
+          board[i * numColumns + j + numRows].name !== ' ' &&
+          board[i * numColumns + j + (numRows * 2)].name !== ' ') {
+        wordCount = wordCount + 1;
+        word = (board[i * numColumns + j].name) + (board[i * numColumns + j + numRows].name) + 
+                (board[i * numColumns + j + (numRows * 2)].name); 
+        console.log('* column word',word);
+        if (wordList[word] === undefined) {
+          wordList[word] = 1;
+        } else {
+          console.log('Duplicate word',word);
+        }
+        }
+      }
+    }
+    console.log(wordList);
     return (wordCount);
   };
 
