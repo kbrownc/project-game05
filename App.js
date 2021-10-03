@@ -30,7 +30,6 @@ export default function App() {
       message,
       score,
       board,
-      wordList,
       endOfGame,
     },
     setGameState,
@@ -38,7 +37,6 @@ export default function App() {
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
-    wordList: {},
     endOfGame: false,
   });
 
@@ -60,20 +58,16 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      let workWordList = prevGameState.wordList;
-      console.log('Reset: at start wordList',wordList);
-      console.log('Reset: at start workWordList',workWordList);
-      Object.keys(workWordList).forEach(key => {delete workWordList[key]});
-      console.log('Reset: after delete workWordList',workWordList);
+      console.log('RESET: board 123',board[0].name,board[1].name,board[2].name);
       return {
         message: 'Reset Pressed',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
-        wordList: workWordList,
         endOfGame: false,
       };
     });
   }, []);
+  //     Object.keys(wordList).forEach(key => {delete wordList[key]});
 
   // enter a Letter from keyboard
   const enterLetter = useCallback((value,key) => {
@@ -97,8 +91,7 @@ export default function App() {
     setGameState(prevGameState => {
       let workMessage = 'Done button';
       let workEndOfGame = false;
-      let workWordList = prevGameState.wordList;
-      console.log('DONE: before word search: workWordList',workWordList);
+      let wordList = {};
       let word = '';
       //  count the words on the board
       //  1) Count words on rows
@@ -110,10 +103,10 @@ export default function App() {
               board[i + 1].name !== '' &&
               board[i + 2].name !== '') {
             word = (board[i].name) + (board[i + 1].name) + (board[i + 2].name); 
-            if (workWordList[word] === undefined) {
-              workWordList[word] = 1;
+            if (wordList[word] === undefined) {
+              wordList[word] = 1;
             } else {
-              workWordList[word] = workWordList[word] + 1;
+              wordList[word] = wordList[word] + 1;
             }
           }
         }
@@ -126,15 +119,14 @@ export default function App() {
               board[i * numColumns + j + (numRows * 2)].name !== '') {
             word = (board[i * numColumns + j].name) + (board[i * numColumns + j + numRows].name) + 
                     (board[i * numColumns + j + (numRows * 2)].name);       
-            if (workWordList[word] === undefined) {
-              workWordList[word] = 1;
+            if (wordList[word] === undefined) {
+              wordList[word] = 1;
             } else {
-              workWordList[word] = workWordList[word] + 1;
+              wordList[word] = wordList[word] + 1;
             }
           }
         }
       }
-      console.log('DONE: after word search: workWordList',workWordList);
       console.log('DONE: wordList',wordList);
       // Check for end of Game
       if (endOfGame) {
@@ -143,8 +135,7 @@ export default function App() {
       return {
         ...prevGameState,
         message: workMessage,
-        score: Object.keys(workWordList).length,
-        wordList: workWordList,
+        score: Object.keys(wordList).length,
         endOfGame: workEndOfGame,
       };
     });
