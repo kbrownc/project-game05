@@ -16,36 +16,29 @@ const numRows = 8;
 
 // This has not been incorporated yet
 const wordLength = 3;
+console.log('********',Date());
 
 const newBoard = [];
 let i;
 for (i = 0; i < (numColumns * numRows) ; i++) {
-  if (i === 1) {
-    newBoard[i] = {key: 2, name: 'C'};
-  } else if (i === 2) {
-    newBoard[i] = {key: 3, name: 'A'};
-  } else if (i === 3) {
-    newBoard[i] = {key: 4, name: 'T'};
-  } else {
-    newBoard[i] = {key: i+1, name: ' '};
-  }
+  newBoard[i] = {key: i+1, name: ''};
 };
 
 export default function App() {
   const [
     {
-      letter,
       message,
       score,
       board,
+      wordList,
       endOfGame,
     },
     setGameState,
   ] = useState({
-    letter: '',
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
+    wordList: {},
     endOfGame: false,
   });
 
@@ -57,66 +50,26 @@ export default function App() {
           onChangeText={(value) => enterLetter(value,item.key)} 
           autoCapitalze="characters"
           maxLength={1}
-          editable={item.name === ' ' ? true : false}
+          value={item.name}
+          editable={item.name === '' ? true : false}
         />
       </View>
     );
   };
 
-  // Count the no. of words on board
-  const countBoard = () => {
-    let wordCount = 0;
-    let word = '';
-    let wordList = {};
-    // Count words on rows
-    let i;
-    let j;
-    for (j = 0; j < numRows ; j++) {
-      for (i = j * numRows; i < ((j + 1) * numColumns - 2) ; i++) {
-        if (board[i].name !== ' ' &&
-          board[i + 1].name !== ' ' &&
-          board[i + 2].name !== ' ') {
-        wordCount = wordCount + 1;
-        word = (board[i].name) + (board[i + 1].name) + (board[i + 2].name); 
-        console.log('* row word',word);
-        if (wordList[word] === undefined) {
-          wordList[word] = 1;
-        } else {
-          console.log('Duplicate word',word);
-        }
-        }
-      }
-    }
-    // Count words on columns
-    for (j = 0; j < numColumns ; j++) {
-      for (i = 0; i < (numRows - 2) ; i++) {
-        if (board[i * numColumns + j].name !== ' ' &&
-          board[i * numColumns + j + numRows].name !== ' ' &&
-          board[i * numColumns + j + (numRows * 2)].name !== ' ') {
-        wordCount = wordCount + 1;
-        word = (board[i * numColumns + j].name) + (board[i * numColumns + j + numRows].name) + 
-                (board[i * numColumns + j + (numRows * 2)].name); 
-        console.log('* column word',word);
-        if (wordList[word] === undefined) {
-          wordList[word] = 1;
-        } else {
-          console.log('Duplicate word',word);
-        }
-        }
-      }
-    }
-    console.log(wordList);
-    return (wordCount);
-  };
-
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
+      let workWordList = prevGameState.wordList;
+      console.log('Reset: at start wordList',wordList);
+      console.log('Reset: at start workWordList',workWordList);
+      Object.keys(workWordList).forEach(key => {delete workWordList[key]});
+      console.log('Reset: after delete workWordList',workWordList);
       return {
-        letter: '',
         message: 'Reset Pressed',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
+        wordList: workWordList,
         endOfGame: false,
       };
     });
@@ -130,8 +83,8 @@ export default function App() {
       workBoard[key - 1].name = value;
       return {
         ...prevGameState,
-        board: workBoard,
         message: workMessage,
+        board: workBoard,
       };
     });
   }, []);
@@ -142,9 +95,47 @@ export default function App() {
   //    Need to update score
   const pressDone = useCallback(() => {
     setGameState(prevGameState => {
-      let workBoard = prevGameState.board.slice();
       let workMessage = 'Done button';
       let workEndOfGame = false;
+      let workWordList = prevGameState.wordList;
+      console.log('DONE: before word search: workWordList',workWordList);
+      let word = '';
+      //  count the words on the board
+      //  1) Count words on rows
+      let i;
+      let j;
+      for (j = 0; j < numRows ; j++) {
+        for (i = j * numRows; i < ((j + 1) * numColumns - 2) ; i++) {
+          if (board[i].name !== '' &&
+              board[i + 1].name !== '' &&
+              board[i + 2].name !== '') {
+            word = (board[i].name) + (board[i + 1].name) + (board[i + 2].name); 
+            if (workWordList[word] === undefined) {
+              workWordList[word] = 1;
+            } else {
+              workWordList[word] = workWordList[word] + 1;
+            }
+          }
+        }
+      }
+      //  2) Count words on columns
+      for (j = 0; j < numColumns ; j++) {
+        for (i = 0; i < (numRows - 2) ; i++) {
+          if (board[i * numColumns + j].name !== '' &&
+              board[i * numColumns + j + numRows].name !== '' &&
+              board[i * numColumns + j + (numRows * 2)].name !== '') {
+            word = (board[i * numColumns + j].name) + (board[i * numColumns + j + numRows].name) + 
+                    (board[i * numColumns + j + (numRows * 2)].name);       
+            if (workWordList[word] === undefined) {
+              workWordList[word] = 1;
+            } else {
+              workWordList[word] = workWordList[word] + 1;
+            }
+          }
+        }
+      }
+      console.log('DONE: after word search: workWordList',workWordList);
+      console.log('DONE: wordList',wordList);
       // Check for end of Game
       if (endOfGame) {
         workMessage = 'Game Complete';
@@ -152,8 +143,8 @@ export default function App() {
       return {
         ...prevGameState,
         message: workMessage,
-        score: countBoard(),
-        board: workBoard,
+        score: Object.keys(workWordList).length,
+        wordList: workWordList,
         endOfGame: workEndOfGame,
       };
     });
