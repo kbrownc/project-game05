@@ -16,24 +16,16 @@ const numRows = 8;
 
 // This has not been incorporated yet
 const wordLength = 3;
-console.log('********',Date());
+console.log('********', Date());
 
 const newBoard = [];
 let i;
-for (i = 0; i < (numColumns * numRows) ; i++) {
-  newBoard[i] = {key: i+1, name: ''};
-};
+for (i = 0; i < numColumns * numRows; i++) {
+  newBoard[i] = { key: i + 1, name: '' };
+}
 
 export default function App() {
-  const [
-    {
-      message,
-      score,
-      board,
-      endOfGame,
-    },
-    setGameState,
-  ] = useState({
+  const [{ message, score, board, endOfGame }, setGameState] = useState({
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
@@ -44,8 +36,9 @@ export default function App() {
   const renderBoard = ({ item }) => {
     return (
       <View style={styles.item}>
-        <TextInput style={styles.itemText} 
-          onChangeText={(value) => enterLetter(value,item.key)} 
+        <TextInput
+          style={styles.itemText}
+          onChangeText={value => enterLetter(value, item.key)}
           autoCapitalze="characters"
           maxLength={1}
           value={item.name}
@@ -58,7 +51,6 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      console.log('RESET: board 123',board[0].name,board[1].name,board[2].name);
       return {
         message: 'Reset Pressed',
         score: 0,
@@ -67,12 +59,11 @@ export default function App() {
       };
     });
   }, []);
-  //     Object.keys(wordList).forEach(key => {delete wordList[key]});
 
   // enter a Letter from keyboard
-  const enterLetter = useCallback((value,key) => {
+  const enterLetter = useCallback((value, key) => {
     setGameState(prevGameState => {
-      let workBoard = prevGameState.board.slice();
+      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       let workMessage = 'Letter entered';
       workBoard[key - 1].name = value;
       return {
@@ -90,6 +81,7 @@ export default function App() {
   const pressDone = useCallback(() => {
     setGameState(prevGameState => {
       let workMessage = 'Done button';
+      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       let workEndOfGame = false;
       let wordList = {};
       let word = '';
@@ -97,37 +89,44 @@ export default function App() {
       //  1) Count words on rows
       let i;
       let j;
-      for (j = 0; j < numRows ; j++) {
-        for (i = j * numRows; i < ((j + 1) * numColumns - 2) ; i++) {
-          if (board[i].name !== '' &&
-              board[i + 1].name !== '' &&
-              board[i + 2].name !== '') {
-            word = (board[i].name) + (board[i + 1].name) + (board[i + 2].name); 
+      for (j = 0; j < numRows; j++) {
+        for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
+          if (workBoard[i].name !== '' && workBoard[i + 1].name !== '' && workBoard[i + 2].name !== '') {
+            word = workBoard[i].name + workBoard[i + 1].name + workBoard[i + 2].name;
             if (wordList[word] === undefined) {
               wordList[word] = 1;
             } else {
-              wordList[word] = wordList[word] + 1;
+              workBoard[i].name = '';
+              workBoard[i + 1].name = '';
+              workBoard[i + 2].name = '';
+              workMessage = 'Duplicate word - word rejected';
             }
           }
         }
       }
       //  2) Count words on columns
-      for (j = 0; j < numColumns ; j++) {
-        for (i = 0; i < (numRows - 2) ; i++) {
-          if (board[i * numColumns + j].name !== '' &&
-              board[i * numColumns + j + numRows].name !== '' &&
-              board[i * numColumns + j + (numRows * 2)].name !== '') {
-            word = (board[i * numColumns + j].name) + (board[i * numColumns + j + numRows].name) + 
-                    (board[i * numColumns + j + (numRows * 2)].name);       
+      for (j = 0; j < numColumns; j++) {
+        for (i = 0; i < numRows - 2; i++) {
+          if (
+            workBoard[i * numColumns + j].name !== '' &&
+            workBoard[i * numColumns + j + numRows].name !== '' &&
+            workBoard[i * numColumns + j + numRows * 2].name !== ''
+          ) {
+            word =
+              workBoard[i * numColumns + j].name +
+              workBoard[i * numColumns + j + numRows].name +
+              workBoard[i * numColumns + j + numRows * 2].name;
             if (wordList[word] === undefined) {
               wordList[word] = 1;
             } else {
-              wordList[word] = wordList[word] + 1;
+              workBoard[i * numColumns + j].name = '';
+              workBoard[i * numColumns + j + numRows].name = '';
+              workBoard[i * numColumns + j + numRows * 2].name = '';
+              workMessage = 'Duplicate word - word rejected';
             }
           }
         }
       }
-      console.log('DONE: wordList',wordList);
       // Check for end of Game
       if (endOfGame) {
         workMessage = 'Game Complete';
@@ -136,6 +135,7 @@ export default function App() {
         ...prevGameState,
         message: workMessage,
         score: Object.keys(wordList).length,
+        board: workBoard,
         endOfGame: workEndOfGame,
       };
     });
@@ -143,38 +143,39 @@ export default function App() {
 
   // render
   return (
-    <TouchableWithoutFeedback onPress={ () => {Keyboard.dismiss()}}>
-    <View style={styles.container}>
-      <View style={styles.nav}>
-        <Button
-          onPress={pressReset}
-          title="Reset"
-          color="blue"
-        />
-        <View style={endOfGame ? styles.itemInvisible : null}>
-          <Button
-            onPress={pressDone}
-            title="Done"
-            color="blue"
-            disabled={endOfGame ? true : false}
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.nav}>
+          <Button onPress={pressReset} title="Reset" color="blue" />
+          <View style={endOfGame ? styles.itemInvisible : null}>
+            <Button onPress={pressDone} title="Done" color="blue" disabled={endOfGame ? true : false} />
+          </View>
+          <View style={styles.itemNav}>
+            <Text style={styles.itemText}>Score</Text>
+          </View>
+          <View style={styles.itemNav}>
+            <Text style={styles.itemText}>{score}</Text>
+          </View>
+        </View>
+        <View style={styles.message}>
+          <View style={styles.messageRow}>
+            <Text style={styles.message}>{message}</Text>
+          </View>
+        </View>
+        <View style={styles.board}>
+          <FlatList
+            data={board}
+            renderItem={renderBoard}
+            style={styles.board}
+            numColumns={numColumns}
+            removeClippedSubviews={false}
           />
         </View>
-        <View style={styles.itemNav}>
-          <Text style={styles.itemText}>Score</Text>
-        </View>
-        <View style={styles.itemNav}>
-          <Text style={styles.itemText}>{score}</Text>
-        </View>
       </View>
-      <View style={styles.message}>
-        <View style={styles.messageRow}>
-          <Text style={styles.message}>{message}</Text>
-        </View>
-      </View>
-      <View style={styles.board}>
-        <FlatList data={board} renderItem={renderBoard} style={styles.board} numColumns={numColumns} removeClippedSubviews={false} />
-      </View>
-    </View>
     </TouchableWithoutFeedback>
   );
 }
