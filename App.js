@@ -1,10 +1,9 @@
 import React, { useState, useCallback } from 'react';
+import {globalStyles} from './global';
 import {
-  StyleSheet,
   Text,
   View,
   FlatList,
-  Dimensions,
   TouchableWithoutFeedback,
   Keyboard,
   Button,
@@ -34,9 +33,9 @@ export default function App() {
       console.log('RENDER Board',index);
     }
     return (
-      <View style={styles.item}>
+      <View style={globalStyles.item}>
         <TextInput
-          style={styles.itemText}
+          style={globalStyles.itemText}
           onChangeText={value => enterLetter(value, index)}
           autoCapitalze="characters"
           maxLength={1}
@@ -166,29 +165,29 @@ export default function App() {
         Keyboard.dismiss();
       }}
     >
-      <View style={styles.container}>
-        <View style={styles.nav}>
-          <Button onPress={pressReset} title="Reset" color="blue" />
+      <View style={globalStyles.container}>
+        <View style={globalStyles.nav}>
+          <Button onPress={pressReset} title="Reset" color="red" />
           <View>
-            <Button onPress={pressDone} title="Done" color="blue" disabled={false} />
+            <Button onPress={pressDone} title="Done" color="red" disabled={false} />
           </View>
-          <View style={styles.itemNav}>
-            <Text style={styles.itemText}>Score</Text>
+          <View style={globalStyles.itemNav}>
+            <Text style={globalStyles.itemText}>Score</Text>
           </View>
-          <View style={styles.itemNav}>
-            <Text style={styles.itemText}>{score}</Text>
-          </View>
-        </View>
-        <View style={styles.message}>
-          <View style={styles.messageRow}>
-            <Text style={styles.message}>{message}</Text>
+          <View style={globalStyles.itemNav}>
+            <Text style={globalStyles.itemText}>{score}</Text>
           </View>
         </View>
-        <View style={styles.board}>
+        <View style={globalStyles.message}>
+          <View style={globalStyles.messageRow}>
+            <Text style={globalStyles.message}>{message}</Text>
+          </View>
+        </View>
+        <View style={globalStyles.board}>
           <FlatList
             data={board}
             renderItem={renderBoard}
-            style={styles.board}
+            style={globalStyles.board}
             numColumns={numColumns}
             keyExtractor={(item, index) => index.toString()}
             removeClippedSubviews={false}
@@ -198,70 +197,3 @@ export default function App() {
     </TouchableWithoutFeedback>
   );
 }
-
-// stylesheets
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 55,
-  },
-  nav: {
-    flex: 0,
-    fontWeight: 'bold',
-    flexDirection: 'row',
-  },
-  input: {
-    width: 50,
-    borderColor: 'gray',
-    borderWidth: 5,
-    borderRadius: 10,
-    padding: 2,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  item: {
-    backgroundColor: 'green',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    margin: 1,
-    height: Dimensions.get('window').width / 8,
-  },
-  itemNav: {
-    backgroundColor: 'green',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    margin: 1,
-    height: 45,
-  },
-  itemText: {
-    color: '#fff',
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
-  message: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'column',
-    color: 'black',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  messageRow: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-    color: 'black',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  board: {
-    flex: 7,
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 1,
-  },
-});
