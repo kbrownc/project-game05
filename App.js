@@ -18,13 +18,7 @@ const numRows = 8;
 const wordLength = 3;
 console.log('***************', Date());
 
-const newBoard2 = new Array(numColumns * numRows).fill('');
-
-const newBoard = [];
-let i;
-for (i = 0; i < numColumns * numRows; i++) {
-  newBoard[i] = { key: i + 1, name: '' };
-}
+const newBoard = new Array(numColumns * numRows).fill('');
 
 export default function App() {
   const [{ message, score, board, letterHistory }, setGameState] = useState({
@@ -35,19 +29,19 @@ export default function App() {
   });
 
   // render board
-  const renderBoard = ({ item }) => {
-    if (item.name !== '') {
-      console.log('RENDER Board',item.key - 1,item.name);
+  const renderBoard = ({ item, index }) => {
+    if (item !== '') {
+      console.log('RENDER Board',index);
     }
     return (
       <View style={styles.item}>
         <TextInput
           style={styles.itemText}
-          onChangeText={value => enterLetter(value, item.key)}
+          onChangeText={value => enterLetter(value, index)}
           autoCapitalze="characters"
           maxLength={1}
-          value={item.name}
-          editable={item.name === '' ? true : false}
+          value={item}
+          editable={item === '' ? true : false}
         />
       </View>
     );
@@ -67,14 +61,14 @@ export default function App() {
   }, []);
 
   // enter a Letter from keyboard
-  const enterLetter = useCallback((value, key) => {
+  const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
       console.log('ENTERLETTER');
       let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       let workMessage = 'Letter entered';
-      workBoard[key - 1].name = value;
-      workLetterHistory.push(key - 1);
+      workBoard[item] = value;
+      workLetterHistory.push(item);
       return {
         ...prevGameState,
         message: workMessage,
@@ -100,25 +94,22 @@ export default function App() {
       let wordList = {};
       let wordList2 = [];
       let word = '';
-      let wordIndex = 0;
       //  count the words on the board
       //  1) Count words on rows
       let i;
       let j;
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
-          if (workBoard[i].name !== '' && workBoard[i + 1].name !== '' && workBoard[i + 2].name !== '') {
-            word = workBoard[i].name + workBoard[i + 1].name + workBoard[i + 2].name;
+          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '') {
+            word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              wordList2[wordList2.length] = {key: workBoard[i].key, name: workBoard[i].name};
-              wordList2[wordList2.length] = {key: workBoard[i + 1].key, name: workBoard[i + 1].name};
-              wordList2[wordList2.length] = {key: workBoard[i + 2].key, name: workBoard[i + 2].name};
+              wordList2[wordList2.length] = {key: i, name: workBoard[i]};
+              wordList2[wordList2.length] = {key: i + 1, name: workBoard[i + 1]};
+              wordList2[wordList2.length] = {key: i + 2, name: workBoard[i + 2]};
             } else {
-              wordIndex = workLetterHistory[workLetterHistory.length - 1];
-              workBoard[wordIndex].name = '';
-              wordIndex = workLetterHistory[workLetterHistory.length - 2];
-              workBoard[wordIndex].name = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
@@ -130,27 +121,25 @@ export default function App() {
       for (j = 0; j < numColumns; j++) {
         for (i = 0; i < numRows - 2; i++) {
           if (
-            workBoard[i * numColumns + j].name !== '' &&
-            workBoard[i * numColumns + j + numRows].name !== '' &&
-            workBoard[i * numColumns + j + numRows * 2].name !== ''
+            workBoard[i * numColumns + j] !== '' &&
+            workBoard[i * numColumns + j + numRows] !== '' &&
+            workBoard[i * numColumns + j + numRows * 2] !== ''
           ) {
             word =
-              workBoard[i * numColumns + j].name +
-              workBoard[i * numColumns + j + numRows].name +
-              workBoard[i * numColumns + j + numRows * 2].name;
+              workBoard[i * numColumns + j] +
+              workBoard[i * numColumns + j + numRows] +
+              workBoard[i * numColumns + j + numRows * 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
               wordList2[wordList2.length] = 
-                  {key: workBoard[i * numColumns + j].key, name: workBoard[i * numColumns + j].name};
+                  {key: i * numColumns + j, name: workBoard[i * numColumns + j]};
               wordList2[wordList2.length] = 
-                  {key: workBoard[i * numColumns + j + numRows].key, name: workBoard[i * numColumns + j + numRows].name};
+                  {key: i * numColumns + j + numRows, name: workBoard[i * numColumns + j + numRows]};
               wordList2[wordList2.length] = 
-                  {key: workBoard[i * numColumns + j + numRows * 2].key, name: workBoard[i * numColumns + j + numRows * 2].name};
+                  {key: i * numColumns + j + numRows * 2, name: workBoard[i * numColumns + j + numRows * 2]};
             } else {
-              wordIndex = workLetterHistory[workLetterHistory.length - 1];
-              workBoard[wordIndex].name = '';
-              wordIndex = workLetterHistory[workLetterHistory.length - 2];
-              workBoard[wordIndex].name = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
@@ -201,6 +190,7 @@ export default function App() {
             renderItem={renderBoard}
             style={styles.board}
             numColumns={numColumns}
+            keyExtractor={(item, index) => index.toString()}
             removeClippedSubviews={false}
           />
         </View>
