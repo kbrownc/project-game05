@@ -60,39 +60,23 @@ export default function App() {
   }, []);
 
   // enter a Letter from keyboard
-  const enterLetter = useCallback((value, item) => {
-    setGameState(prevGameState => {
-      console.log('ENTERLETTER');
-      let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
-      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      let workMessage = 'Letter entered';
-      workBoard[item] = value;
-      workLetterHistory.push(item);
-      return {
-        ...prevGameState,
-        message: workMessage,
-        board: workBoard,
-        letterHistory: workLetterHistory,
-      };
-    });
-  }, []);
-
-  // press DONE entering the letters button
   //    Need to validate entry of letters (spelling and duplicates)
   //    Neeed to check if we are at end of game
   //    Need to update score
   //
   //  letterHistory - an array listing the letters entered onto the board in the order added
   //   wordList - list of the 3-letter words on the board
-  const pressDone = useCallback(() => {
+  const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
-      console.log('DONE');
-      let workMessage = 'Done button';
-      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      console.log('ENTERLETTER');
       let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
+      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      let workMessage = 'Letter entered';
       let wordList = {};
       let wordList2 = [];
       let word = '';
+      workBoard[item] = value;
+      workLetterHistory.push(item);
       //  count the words on the board
       //  1) Count words on rows
       let i;
@@ -146,8 +130,6 @@ export default function App() {
           }
         }
       }
-      console.log('wordList',wordList);
-      console.log('wordList2',wordList2);
       return {
         ...prevGameState,
         message: workMessage,
@@ -168,9 +150,6 @@ export default function App() {
       <View style={globalStyles.container}>
         <View style={globalStyles.nav}>
           <Button onPress={pressReset} title="Reset" color="red" />
-          <View>
-            <Button onPress={pressDone} title="Done" color="red" disabled={false} />
-          </View>
           <View style={globalStyles.itemNav}>
             <Text style={globalStyles.itemText}>Score</Text>
           </View>
