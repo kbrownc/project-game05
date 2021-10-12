@@ -30,17 +30,17 @@ export default function App() {
   // render board
   const renderBoard = ({ item, index }) => {
     if (item !== '') {
-      console.log('RENDER Board',index);
+      console.log('RENDER Board', item, index);
     }
     return (
-      <View style={globalStyles.item}>
+      <View style={item === ' ' ? [globalStyles.item, globalStyles.itemRed] : globalStyles.item}>
         <TextInput
           style={globalStyles.itemText}
           onChangeText={value => enterLetter(value, index)}
           autoCapitalze="characters"
-          maxLength={1}
+          maxLength={2}
           value={item}
-          editable={item === '' ? true : false}
+          editable={item === '' || item === ' ' ? true : false}
         />
       </View>
     );
@@ -75,15 +75,47 @@ export default function App() {
       let wordList = {};
       let wordList2 = [];
       let word = '';
-      workBoard[item] = value;
-      workLetterHistory.push(item);
-      //  count the words on the board
-      //  1) Count words on rows
       let i;
       let j;
+      // add letter to board
+      workBoard[item] = value.trim();
+      workLetterHistory.push(item);
+      // mark squares on board that can be used     
+      //  - rows
+      for (j = 0; j < numRows; j++) {
+        for (i = j * numRows; i < (j + 1) * numColumns - 1; i++) {
+          if (workBoard[i] !== '' && workBoard[i] !== ' ') {
+            if (i > 0 && workBoard[i - 1] === ''){
+            workBoard[i - 1] = ' ';
+            } 
+            if (i < (numRows * numColumns) && workBoard[i + 1] === '') {
+              workBoard[i + 1] = ' ';
+            }
+          }
+        }
+      }
+      //  - columns
+      for (j = 0; j < numColumns; j++) {
+        for (i = 0; i < numRows - 1; i++) {
+          if (
+            workBoard[i * numColumns + j] !== '' &&
+            workBoard[i * numColumns + j] !== ' '
+          ) {
+            if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
+            workBoard[i * numColumns + j - 8] = ' ';
+            } 
+            if (i < (numRows * numColumns) && workBoard[i * numColumns + j + 8] === '') {
+              workBoard[i * numColumns + j + 8] = ' ';
+            }
+          }
+        }
+      }
+      //  find the words on the board
+      //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
-          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '') {
+          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '' &&
+            workBoard[i] !== ' ' && workBoard[i + 1] !== ' ' && workBoard[i + 2] !== ' ') {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
@@ -96,17 +128,22 @@ export default function App() {
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
+              workBoard[i + 1] = '';
+              workBoard[i + 2] = '';
             }
           }
         }
       }
-      //  2) Count words on columns
+      //  2) find words on columns
       for (j = 0; j < numColumns; j++) {
         for (i = 0; i < numRows - 2; i++) {
           if (
             workBoard[i * numColumns + j] !== '' &&
             workBoard[i * numColumns + j + numRows] !== '' &&
-            workBoard[i * numColumns + j + numRows * 2] !== ''
+            workBoard[i * numColumns + j + numRows * 2] !== '' &&
+            workBoard[i * numColumns + j] !== ' ' &&
+            workBoard[i * numColumns + j + numRows] !== ' ' &&
+            workBoard[i * numColumns + j + numRows * 2] !== ' '
           ) {
             word =
               workBoard[i * numColumns + j] +
@@ -126,10 +163,13 @@ export default function App() {
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
+              workBoard[i * numColumns + j + numRows] = '';
+              workBoard[i * numColumns + j + numRows * 2] = '';
             }
           }
         }
       }
+      console.log('wordList',wordList);
       return {
         ...prevGameState,
         message: workMessage,

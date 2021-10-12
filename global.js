@@ -65,4 +65,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 1,
   },
+  itemRed: {
+    backgroundColor: 'red',
+  },
 });
