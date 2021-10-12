@@ -8,6 +8,7 @@ import {
   Keyboard,
   Button,
   TextInput,
+  Alert,
 } from 'react-native';
 
 const numColumns = 8;
@@ -58,6 +59,13 @@ export default function App() {
       };
     });
   }, []);
+
+  // press Alert button
+  const pressAlert = () => {
+      console.log('ALERT');
+      const alertMessage = 'These are the instructions on how to play this game';
+      Alert.alert('How to Play', alertMessage, [{text: 'understood'}]);
+      };
 
   // enter a Letter from keyboard
   //    Need to validate entry of letters (spelling and duplicates)
@@ -196,6 +204,7 @@ export default function App() {
           <View style={globalStyles.itemNav}>
             <Text style={globalStyles.itemText}>{score}</Text>
           </View>
+          <Button onPress={pressAlert} title="About" color="green" />
         </View>
         <View style={globalStyles.message}>
           <View style={globalStyles.messageRow}>
