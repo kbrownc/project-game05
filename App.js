@@ -18,7 +18,10 @@ const numRows = 8;
 const wordLength = 3;
 console.log('***************', Date());
 
-const newBoard = new Array(numColumns * numRows).fill('');
+let newBoard = new Array(numColumns * numRows).fill('');
+newBoard[26] = ' ';
+newBoard[27] = ' ';
+newBoard[28] = ' ';
 
 export default function App() {
   const [{ message, score, board, letterHistory }, setGameState] = useState({
@@ -91,12 +94,12 @@ export default function App() {
       // mark squares on board that can be used     
       //  - rows
       for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns - 1; i++) {
+        for (i = j * numRows; i < (j + 1) * numColumns; i++) {
           if (workBoard[i] !== '' && workBoard[i] !== ' ') {
-            if (i > 0 && workBoard[i - 1] === ''){
+            if (i > 0 &&  i % 8 !== 0 && workBoard[i - 1] === ''){
             workBoard[i - 1] = ' ';
             } 
-            if (i < (numRows * numColumns) && workBoard[i + 1] === '') {
+            if (i < (numRows * numColumns) && i % 8 !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
             }
           }
@@ -104,7 +107,7 @@ export default function App() {
       }
       //  - columns
       for (j = 0; j < numColumns; j++) {
-        for (i = 0; i < numRows - 1; i++) {
+        for (i = 0; i < numRows; i++) {
           if (
             workBoard[i * numColumns + j] !== '' &&
             workBoard[i * numColumns + j] !== ' '
