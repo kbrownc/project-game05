@@ -33,7 +33,7 @@ export default function App() {
 
   // render board
   const renderBoard = ({ item, index }) => {
-    if (item !== '') {
+    if (item !== '' && item !== ' ') {
       console.log('RENDER Board', item, index);
     }
     return (
@@ -44,7 +44,7 @@ export default function App() {
           autoCapitalze="characters"
           maxLength={2}
           value={item}
-          editable={item === '' || item === ' ' ? true : false}
+          editable={item === ' ' ? true : false}
         />
       </View>
     );
@@ -91,6 +91,35 @@ export default function App() {
       // add letter to board
       workBoard[item] = value.trim();
       workLetterHistory.push(item);
+      //  find the words on the board that are greater than 3 letters
+      //  1) find words on rows
+      for (j = 0; j < numRows; j++) {
+        for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
+          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '' && workBoard[i + 3] !== '' &&
+            workBoard[i] !== ' ' && workBoard[i + 1] !== ' ' && workBoard[i + 2] !== ' ' && workBoard[i + 3] !== ' ') {
+            workBoard[item] = ' ';
+            workMessage = 'Word too long - letter rejected';
+          }
+        }
+      }
+      //  2) find words on columns
+      for (j = 0; j < numColumns; j++) {
+        for (i = 0; i < numRows - 2; i++) {
+          if (
+            workBoard[i * numColumns + j] !== '' &&
+            workBoard[i * numColumns + j + numRows] !== '' &&
+            workBoard[i * numColumns + j + numRows * 2] !== '' &&
+            workBoard[i * numColumns + j + numRows * 3] !== '' &&
+            workBoard[i * numColumns + j] !== ' ' &&
+            workBoard[i * numColumns + j + numRows] !== ' ' &&
+            workBoard[i * numColumns + j + numRows * 2] !== ' ' &&
+            workBoard[i * numColumns + j + numRows * 3] !== ' '
+          ) {
+            workMessage = 'Word too long - letter rejected';
+            workBoard[item] = ' ';
+          }
+        }
+      }
       // mark squares on board that can be used     
       //  - rows
       for (j = 0; j < numRows; j++) {
