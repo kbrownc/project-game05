@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {globalStyles} from './global';
+import { globalStyles } from './global';
 import {
   Text,
   View,
@@ -63,10 +63,10 @@ export default function App() {
 
   // press Alert button
   const pressAlert = () => {
-      console.log('ALERT');
-      const alertMessage = 'These are the instructions on how to play this game';
-      Alert.alert('How to Play', alertMessage, [{text: 'understood'}]);
-      };
+    console.log('ALERT');
+    const alertMessage = 'These are the instructions on how to play this game';
+    Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
+  };
 
   // enter a Letter from keyboard
   //    Need to validate entry of letters (spelling and duplicates)
@@ -93,8 +93,16 @@ export default function App() {
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
-          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '' && workBoard[i + 3] !== '' &&
-            workBoard[i] !== ' ' && workBoard[i + 1] !== ' ' && workBoard[i + 2] !== ' ' && workBoard[i + 3] !== ' ') {
+          if (
+            workBoard[i] !== '' &&
+            workBoard[i + 1] !== '' &&
+            workBoard[i + 2] !== '' &&
+            workBoard[i + 3] !== '' &&
+            workBoard[i] !== ' ' &&
+            workBoard[i + 1] !== ' ' &&
+            workBoard[i + 2] !== ' ' &&
+            workBoard[i + 3] !== ' '
+          ) {
             workBoard[item] = ' ';
             workMessage = 'Word too long - letter rejected';
           }
@@ -118,15 +126,16 @@ export default function App() {
           }
         }
       }
-      // mark squares on board that can be used     
+      // mark squares on board that can be used
       //  - rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
+          // Mark squares that can be used
           if (workBoard[i] !== '' && workBoard[i] !== ' ') {
-            if (i > 0 &&  i % 8 !== 0 && workBoard[i - 1] === ''){
-            workBoard[i - 1] = ' ';
-            } 
-            if (i < (numRows * numColumns) && i % 8 !== 7 && workBoard[i + 1] === '') {
+            if (i > 0 && i % 8 !== 0 && workBoard[i - 1] === '') {
+              workBoard[i - 1] = ' ';
+            }
+            if (i < numRows * numColumns && i % 8 !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
             }
           }
@@ -135,16 +144,31 @@ export default function App() {
       //  - columns
       for (j = 0; j < numColumns; j++) {
         for (i = 0; i < numRows; i++) {
-          if (
-            workBoard[i * numColumns + j] !== '' &&
-            workBoard[i * numColumns + j] !== ' '
-          ) {
+          if (workBoard[i * numColumns + j] !== '' && workBoard[i * numColumns + j] !== ' ') {
+            // Mark squares that can be used
             if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
-            workBoard[i * numColumns + j - 8] = ' ';
-            } 
-            if (i < (numRows * numColumns) && workBoard[i * numColumns + j + 8] === '') {
+              workBoard[i * numColumns + j - 8] = ' ';
+            }
+            if (i < numRows * numColumns && workBoard[i * numColumns + j + 8] === '') {
               workBoard[i * numColumns + j + 8] = ' ';
             }
+          }
+        }
+      }
+      // mark squares on board that cannot be used
+      for (j = 0; j < numRows; j++) {
+        for (i = j * numRows; i < (j + 1) * numColumns; i++) {
+          if (
+            workBoard[i] === ' ' &&
+              (workBoard[i + 1] !== ' ' && workBoard[i + 1] !== '' &&
+              ((workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') | 
+              (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))) |
+
+              (workBoard[i - 1] !== ' ' && workBoard[i - 1] !== '' &&
+              ((workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') | 
+              (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')))
+          ) {
+            workBoard[i] = '';
           }
         }
       }
@@ -152,14 +176,20 @@ export default function App() {
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
-          if (workBoard[i] !== '' && workBoard[i + 1] !== '' && workBoard[i + 2] !== '' &&
-            workBoard[i] !== ' ' && workBoard[i + 1] !== ' ' && workBoard[i + 2] !== ' ') {
+          if (
+            workBoard[i] !== '' &&
+            workBoard[i + 1] !== '' &&
+            workBoard[i + 2] !== '' &&
+            workBoard[i] !== ' ' &&
+            workBoard[i + 1] !== ' ' &&
+            workBoard[i + 2] !== ' '
+          ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              wordList2[wordList2.length] = {key: i, name: workBoard[i]};
-              wordList2[wordList2.length] = {key: i + 1, name: workBoard[i + 1]};
-              wordList2[wordList2.length] = {key: i + 2, name: workBoard[i + 2]};
+              wordList2[wordList2.length] = { key: i, name: workBoard[i] };
+              wordList2[wordList2.length] = { key: i + 1, name: workBoard[i + 1] };
+              wordList2[wordList2.length] = { key: i + 2, name: workBoard[i + 2] };
               workBoard[i - 1] = '';
               workBoard[i + 3] = '';
             } else {
@@ -191,12 +221,15 @@ export default function App() {
               workBoard[i * numColumns + j + numRows * 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              wordList2[wordList2.length] = 
-                  {key: i * numColumns + j, name: workBoard[i * numColumns + j]};
-              wordList2[wordList2.length] = 
-                  {key: i * numColumns + j + numRows, name: workBoard[i * numColumns + j + numRows]};
-              wordList2[wordList2.length] = 
-                  {key: i * numColumns + j + numRows * 2, name: workBoard[i * numColumns + j + numRows * 2]};
+              wordList2[wordList2.length] = { key: i * numColumns + j, name: workBoard[i * numColumns + j] };
+              wordList2[wordList2.length] = {
+                key: i * numColumns + j + numRows,
+                name: workBoard[i * numColumns + j + numRows],
+              };
+              wordList2[wordList2.length] = {
+                key: i * numColumns + j + numRows * 2,
+                name: workBoard[i * numColumns + j + numRows * 2],
+              };
               workBoard[i * numColumns + j - numRows] = '';
               workBoard[i * numColumns + j + numRows * 3] = '';
             } else {
@@ -211,7 +244,7 @@ export default function App() {
           }
         }
       }
-      console.log('wordList',wordList);
+      console.log('wordList', wordList);
       return {
         ...prevGameState,
         message: workMessage,
