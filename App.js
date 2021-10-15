@@ -19,9 +19,7 @@ const wordLength = 3;
 console.log('***************', Date());
 
 let newBoard = new Array(numColumns * numRows).fill('');
-newBoard[26] = ' ';
 newBoard[27] = ' ';
-newBoard[28] = ' ';
 
 export default function App() {
   const [{ message, score, board, letterHistory }, setGameState] = useState({
@@ -162,6 +160,8 @@ export default function App() {
               wordList2[wordList2.length] = {key: i, name: workBoard[i]};
               wordList2[wordList2.length] = {key: i + 1, name: workBoard[i + 1]};
               wordList2[wordList2.length] = {key: i + 2, name: workBoard[i + 2]};
+              workBoard[i - 1] = '';
+              workBoard[i + 3] = '';
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
               workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
@@ -197,6 +197,8 @@ export default function App() {
                   {key: i * numColumns + j + numRows, name: workBoard[i * numColumns + j + numRows]};
               wordList2[wordList2.length] = 
                   {key: i * numColumns + j + numRows * 2, name: workBoard[i * numColumns + j + numRows * 2]};
+              workBoard[i * numColumns + j - numRows] = '';
+              workBoard[i * numColumns + j + numRows * 3] = '';
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
               workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
