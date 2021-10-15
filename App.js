@@ -92,7 +92,7 @@ export default function App() {
       //  find the words on the board that are greater than 3 letters
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
+        for (i = j * numRows; i < (j + 1) * numColumns - 3; i++) {
           if (
             workBoard[i] !== '' &&
             workBoard[i + 1] !== '' &&
@@ -110,7 +110,7 @@ export default function App() {
       }
       //  2) find words on columns
       for (j = 0; j < numColumns; j++) {
-        for (i = 0; i < numRows - 2; i++) {
+        for (i = 0; i < numRows - 3; i++) {
           if (
             workBoard[i * numColumns + j] !== '' &&
             workBoard[i * numColumns + j + numRows] !== '' &&
@@ -244,6 +244,8 @@ export default function App() {
           }
         }
       }
+      // End of Game check
+      if (workBoard.indexOf(' ') === -1) {workMessage = 'Game completed';}
       console.log('wordList', wordList);
       return {
         ...prevGameState,
