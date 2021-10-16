@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { globalStyles } from './global';
+import { allWords } from './ThreeLetterWords';
 import {
   Text,
   View,
@@ -10,6 +11,13 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+
+let wordDictionary = [];
+
+for (var i = 0, charsLength = allWords.length; i < charsLength; i += 3) {
+    wordDictionary.push(allWords.substring(i, i + 3));
+}
+console.log('loaded wordDictionary',wordDictionary.length);
 
 const numColumns = 8;
 const numRows = 8;
@@ -31,9 +39,9 @@ export default function App() {
 
   // render board
   const renderBoard = ({ item, index }) => {
-    if (item !== '' && item !== ' ') {
-      console.log('RENDER Board', item, index);
-    }
+  //  if (item !== '' && item !== ' ') {
+  //    console.log('RENDER Board', item, index);
+  //  }
     return (
       <View style={item === ' ' ? [globalStyles.item, globalStyles.itemRed] : globalStyles.item}>
         <TextInput
@@ -185,6 +193,8 @@ export default function App() {
             workBoard[i + 2] !== ' '
           ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
+            console.log('word',word,wordDictionary.indexOf(word.toLowerCase()));
+            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
             if (wordList[word] === undefined) {
               wordList[word] = 1;
               wordList2[wordList2.length] = { key: i, name: workBoard[i] };
@@ -219,6 +229,8 @@ export default function App() {
               workBoard[i * numColumns + j] +
               workBoard[i * numColumns + j + numRows] +
               workBoard[i * numColumns + j + numRows * 2];
+            console.log('word',word,wordDictionary.indexOf(word.toLowerCase()));
+            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
             if (wordList[word] === undefined) {
               wordList[word] = 1;
               wordList2[wordList2.length] = { key: i * numColumns + j, name: workBoard[i * numColumns + j] };
