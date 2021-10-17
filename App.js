@@ -17,14 +17,9 @@ let wordDictionary = [];
 for (var i = 0, charsLength = allWords.length; i < charsLength; i += 3) {
     wordDictionary.push(allWords.substring(i, i + 3));
 }
-console.log('loaded wordDictionary',wordDictionary.length);
 
 const numColumns = 8;
 const numRows = 8;
-
-// This has not been incorporated yet
-const wordLength = 3;
-console.log('***************', Date());
 
 let newBoard = new Array(numColumns * numRows).fill('');
 newBoard[27] = ' ';
@@ -39,9 +34,6 @@ export default function App() {
 
   // render board
   const renderBoard = ({ item, index }) => {
-  //  if (item !== '' && item !== ' ') {
-  //    console.log('RENDER Board', item, index);
-  //  }
     return (
       <View style={item === ' ' ? [globalStyles.item, globalStyles.itemRed] : globalStyles.item}>
         <TextInput
@@ -61,7 +53,7 @@ export default function App() {
     setGameState(prevGameState => {
       console.log('RESET');
       return {
-        message: 'Reset Pressed',
+        message: 'Enter 1st word',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
         letterHistory: [],
@@ -88,9 +80,8 @@ export default function App() {
       console.log('ENTERLETTER');
       let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      let workMessage = 'Letter entered';
+      let workMessage = 'enter a letter';
       let wordList = {};
-      let wordList2 = [];
       let word = '';
       let i;
       let j;
@@ -193,13 +184,9 @@ export default function App() {
             workBoard[i + 2] !== ' '
           ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
-            console.log('word',word,wordDictionary.indexOf(word.toLowerCase()));
-            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              wordList2[wordList2.length] = { key: i, name: workBoard[i] };
-              wordList2[wordList2.length] = { key: i + 1, name: workBoard[i + 1] };
-              wordList2[wordList2.length] = { key: i + 2, name: workBoard[i + 2] };
+              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
               workBoard[i - 1] = '';
               workBoard[i + 3] = '';
             } else {
@@ -229,19 +216,9 @@ export default function App() {
               workBoard[i * numColumns + j] +
               workBoard[i * numColumns + j + numRows] +
               workBoard[i * numColumns + j + numRows * 2];
-            console.log('word',word,wordDictionary.indexOf(word.toLowerCase()));
-            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              wordList2[wordList2.length] = { key: i * numColumns + j, name: workBoard[i * numColumns + j] };
-              wordList2[wordList2.length] = {
-                key: i * numColumns + j + numRows,
-                name: workBoard[i * numColumns + j + numRows],
-              };
-              wordList2[wordList2.length] = {
-                key: i * numColumns + j + numRows * 2,
-                name: workBoard[i * numColumns + j + numRows * 2],
-              };
+              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
               workBoard[i * numColumns + j - numRows] = '';
               workBoard[i * numColumns + j + numRows * 3] = '';
             } else {
