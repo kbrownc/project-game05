@@ -14,7 +14,7 @@ import {
 
 let wordDictionary = [];
 
-for (var i = 0, charsLength = allWords.length; i < charsLength; i += 3) {
+for (let i = 0; i < allWords.length; i += 3) {
     wordDictionary.push(allWords.substring(i, i + 3));
 }
 
@@ -22,7 +22,8 @@ const numColumns = 8;
 const numRows = 8;
 
 let newBoard = new Array(numColumns * numRows).fill('');
-newBoard[27] = ' ';
+let randomNumber = Math.floor(Math.random() * 63);
+newBoard[randomNumber] = ' ';
 
 export default function App() {
   const [{ message, score, board, letterHistory }, setGameState] = useState({
@@ -52,6 +53,9 @@ export default function App() {
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
       console.log('RESET');
+      newBoard[randomNumber] = '';
+      randomNumber = Math.floor(Math.random() * 63);
+      newBoard[randomNumber] = ' ';
       return {
         message: 'Enter 1st word',
         score: 0,
@@ -63,7 +67,6 @@ export default function App() {
 
   // press Alert button
   const pressAlert = () => {
-    console.log('ALERT');
     const alertMessage = 'These are the instructions on how to play this game';
     Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
   };
@@ -88,44 +91,7 @@ export default function App() {
       // add letter to board
       workBoard[item] = value.trim();
       workLetterHistory.push(item);
-      //  find the words on the board that are greater than 3 letters
-      //  1) find words on rows
-      for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns - 3; i++) {
-          if (
-            workBoard[i] !== '' &&
-            workBoard[i + 1] !== '' &&
-            workBoard[i + 2] !== '' &&
-            workBoard[i + 3] !== '' &&
-            workBoard[i] !== ' ' &&
-            workBoard[i + 1] !== ' ' &&
-            workBoard[i + 2] !== ' ' &&
-            workBoard[i + 3] !== ' '
-          ) {
-            workBoard[item] = ' ';
-            workMessage = 'Word too long - letter rejected';
-          }
-        }
-      }
-      //  2) find words on columns
-      for (j = 0; j < numColumns; j++) {
-        for (i = 0; i < numRows - 3; i++) {
-          if (
-            workBoard[i * numColumns + j] !== '' &&
-            workBoard[i * numColumns + j + numRows] !== '' &&
-            workBoard[i * numColumns + j + numRows * 2] !== '' &&
-            workBoard[i * numColumns + j + numRows * 3] !== '' &&
-            workBoard[i * numColumns + j] !== ' ' &&
-            workBoard[i * numColumns + j + numRows] !== ' ' &&
-            workBoard[i * numColumns + j + numRows * 2] !== ' ' &&
-            workBoard[i * numColumns + j + numRows * 3] !== ' '
-          ) {
-            workMessage = 'Word too long - letter rejected';
-            workBoard[item] = ' ';
-          }
-        }
-      }
-      // mark squares on board that can be used
+      // mark squares on board that can be used (both sides of letter)
       //  - rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
@@ -154,7 +120,7 @@ export default function App() {
           }
         }
       }
-      // mark squares on board that cannot be used
+      // remove squares on board that cannot be used (those tht have letters on 2 sides)
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
           if (
@@ -171,7 +137,7 @@ export default function App() {
           }
         }
       }
-      //  find the words on the board
+      //  find the words on the board (mark squares at ends as no longer available)
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
@@ -187,6 +153,7 @@ export default function App() {
             if (wordList[word] === undefined) {
               wordList[word] = 1;
               if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
+              console.log('row-outside array?',word,i - 1,i + 3);
               workBoard[i - 1] = '';
               workBoard[i + 3] = '';
             } else {
@@ -219,6 +186,7 @@ export default function App() {
             if (wordList[word] === undefined) {
               wordList[word] = 1;
               if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
+              console.log('cols-outside array?',word,i * numColumns + j - numRows,i * numColumns + j + numRows * 3);
               workBoard[i * numColumns + j - numRows] = '';
               workBoard[i * numColumns + j + numRows * 3] = '';
             } else {
@@ -235,7 +203,7 @@ export default function App() {
       }
       // End of Game check
       if (workBoard.indexOf(' ') === -1) {workMessage = 'Game completed';}
-      console.log('wordList', wordList);
+      // console.log('wordList', wordList);
       return {
         ...prevGameState,
         message: workMessage,
