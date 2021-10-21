@@ -15,7 +15,7 @@ import {
 let wordDictionary = [];
 
 for (let i = 0; i < allWords.length; i += 3) {
-    wordDictionary.push(allWords.substring(i, i + 3));
+  wordDictionary.push(allWords.substring(i, i + 3));
 }
 
 const numColumns = 8;
@@ -26,11 +26,12 @@ let randomNumber = Math.floor(Math.random() * 63);
 newBoard[randomNumber] = ' ';
 
 export default function App() {
-  const [{ message, score, board, letterHistory }, setGameState] = useState({
+  const [{ message, score, board, letterHistory, squareHistory }, setGameState] = useState({
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
     letterHistory: [],
+    squareHistory: [],
   });
 
   // render board
@@ -61,6 +62,7 @@ export default function App() {
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
         letterHistory: [],
+        squareHistory: [],
       };
     });
   }, []);
@@ -77,11 +79,13 @@ export default function App() {
   //    Need to update score
   //
   //  letterHistory - an array listing the letters entered onto the board in the order added
+  //  squareHistory - an array listing te squares on the board marked as valid for the entry of a letter
   //   wordList - list of the 3-letter words on the board
   const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
       console.log('ENTERLETTER');
       let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
+      let workSquareHistory = JSON.parse(JSON.stringify(prevGameState.squareHistory));
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       let workMessage = 'enter a letter';
       let wordList = {};
@@ -91,17 +95,19 @@ export default function App() {
       // add letter to board
       workBoard[item] = value.trim();
       workLetterHistory.push(item);
+      console.log('workSquareHistory', workSquareHistory);
       // mark squares on board that can be used (both sides of letter)
       //  - rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
-          // Mark squares that can be used
           if (workBoard[i] !== '' && workBoard[i] !== ' ') {
             if (i > 0 && i % 8 !== 0 && workBoard[i - 1] === '') {
               workBoard[i - 1] = ' ';
+              workSquareHistory.push(i - 1);
             }
             if (i < numRows * numColumns && i % 8 !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
+              workSquareHistory.push(i + 1);
             }
           }
         }
@@ -110,34 +116,36 @@ export default function App() {
       for (j = 0; j < numColumns; j++) {
         for (i = 0; i < numRows; i++) {
           if (workBoard[i * numColumns + j] !== '' && workBoard[i * numColumns + j] !== ' ') {
-            // Mark squares that can be used
             if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
               workBoard[i * numColumns + j - 8] = ' ';
+              workSquareHistory.push(i * numColumns + j - 8);
             }
             if (i < numRows * numColumns && workBoard[i * numColumns + j + 8] === '') {
               workBoard[i * numColumns + j + 8] = ' ';
+              workSquareHistory.push(i * numColumns + j + 8);
             }
           }
         }
       }
-      // remove squares on board that cannot be used (those tht have letters on 2 sides)
+      // remove squares on board that cannot be used (those tht have letters on 2 corner sides)
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
           if (
             workBoard[i] === ' ' &&
-              (workBoard[i + 1] !== ' ' && workBoard[i + 1] !== '' &&
-              ((workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') | 
-              (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))) |
-
-              (workBoard[i - 1] !== ' ' && workBoard[i - 1] !== '' &&
-              ((workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') | 
-              (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')))
+            (workBoard[i + 1] !== ' ' &&
+              workBoard[i + 1] !== '' &&
+              (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
+                (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')) |
+              (workBoard[i - 1] !== ' ' &&
+                workBoard[i - 1] !== '' &&
+                (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
+                  (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))
           ) {
             workBoard[i] = '';
           }
         }
       }
-      //  find the words on the board (mark squares at ends as no longer available)
+      //  find the words on the board (and mark squares at ends as no longer available)
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
@@ -152,18 +160,22 @@ export default function App() {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
-              console.log('row-outside array?',word,i - 1,i + 3);
-              workBoard[i - 1] = '';
-              workBoard[i + 3] = '';
+              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
+                workMessage = 'Word not found';
+              }
+              if ((i - 1) % 8 >= 0) {
+                workBoard[i - 1] = '';
+              }
+              if ((i + 3) % 8 <= 7 && i + 3 < 64) {
+                workBoard[i + 3] = '';
+              }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
-              workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 2]] = ' ';
+              workSquareHistory.push(workSquareHistory[workSquareHistory.length - 2]);
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
-              workBoard[i + 1] = '';
-              workBoard[i + 2] = '';
             }
           }
         }
@@ -185,31 +197,37 @@ export default function App() {
               workBoard[i * numColumns + j + numRows * 2];
             if (wordList[word] === undefined) {
               wordList[word] = 1;
-              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {workMessage = 'Word not found';}
-              console.log('cols-outside array?',word,i * numColumns + j - numRows,i * numColumns + j + numRows * 3);
-              workBoard[i * numColumns + j - numRows] = '';
-              workBoard[i * numColumns + j + numRows * 3] = '';
+              if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
+                workMessage = 'Word not found';
+              }
+              if (i * numColumns + j - numRows >= 0) {
+                workBoard[i * numColumns + j - numRows] = '';
+              }
+              if (i * numColumns + j + numRows * 3 < 64) {
+                workBoard[i * numColumns + j + numRows * 3] = '';
+              }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
-              workBoard[workLetterHistory[workLetterHistory.length - 2]] = '';
+              workBoard[workLetterHistory[workLetterHistory.length - 2]] = ' ';
+              workSquareHistory.push(workLetterHistory[workLetterHistory.length - 2]);
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
-              workBoard[i * numColumns + j + numRows] = '';
-              workBoard[i * numColumns + j + numRows * 2] = '';
             }
           }
         }
       }
       // End of Game check
-      if (workBoard.indexOf(' ') === -1) {workMessage = 'Game completed';}
-      // console.log('wordList', wordList);
+      if (workBoard.indexOf(' ') === -1) {
+        workMessage = 'Game completed';
+      }
       return {
         ...prevGameState,
         message: workMessage,
         score: Object.keys(wordList).length,
         board: workBoard,
         letterHistory: workLetterHistory,
+        squareHistory: workSquareHistory,
       };
     });
   }, []);
