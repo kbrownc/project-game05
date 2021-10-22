@@ -23,7 +23,7 @@ const numRows = 8;
 
 let newBoard = new Array(numColumns * numRows).fill('');
 let randomNumber = Math.floor(Math.random() * 63);
-newBoard[randomNumber] = ' ';
+newBoard[0] = ' ';
 
 export default function App() {
   const [{ message, score, board, letterHistory, squareHistory }, setGameState] = useState({
@@ -56,7 +56,7 @@ export default function App() {
       console.log('RESET');
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
-      newBoard[randomNumber] = ' ';
+      newBoard[0] = ' ';
       return {
         message: 'Enter 1st word',
         score: 0,
@@ -134,10 +134,12 @@ export default function App() {
             workBoard[i] === ' ' &&
             (workBoard[i + 1] !== ' ' &&
               workBoard[i + 1] !== '' &&
+              j % 8 <  7 &&
               (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
                 (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')) |
               (workBoard[i - 1] !== ' ' &&
                 workBoard[i - 1] !== '' &&
+                j % 8 >  0 &&
                 (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
                   (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))
           ) {
