@@ -83,7 +83,7 @@ export default function App() {
   //   wordList - list of the 3-letter words on the board
   const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
-      console.log('ENTERLETTER');
+      console.log('ENTERLETTER', value, item);
       let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
       let workSquareHistory = JSON.parse(JSON.stringify(prevGameState.squareHistory));
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
@@ -95,7 +95,8 @@ export default function App() {
       // add letter to board
       workBoard[item] = value.trim();
       workLetterHistory.push(item);
-      console.log('workSquareHistory', workSquareHistory);
+      console.log('remove Letter   ', ...workSquareHistory);
+      workSquareHistory.splice(workSquareHistory.indexOf(item),1);
       // mark squares on board that can be used (both sides of letter)
       //  - rows
       for (j = 0; j < numRows; j++) {
@@ -104,10 +105,12 @@ export default function App() {
             if (i > 0 && i % 8 !== 0 && workBoard[i - 1] === '') {
               workBoard[i - 1] = ' ';
               workSquareHistory.push(i - 1);
+              console.log('row add square -1',i - 1,'   ',...workSquareHistory);
             }
             if (i < numRows * numColumns && i % 8 !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
               workSquareHistory.push(i + 1);
+              console.log('row add square +1',i + 1,'   ',...workSquareHistory);
             }
           }
         }
@@ -119,10 +122,12 @@ export default function App() {
             if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
               workBoard[i * numColumns + j - 8] = ' ';
               workSquareHistory.push(i * numColumns + j - 8);
+              console.log('col add square -8   ',...workSquareHistory);
             }
             if (i < numRows * numColumns && workBoard[i * numColumns + j + 8] === '') {
               workBoard[i * numColumns + j + 8] = ' ';
               workSquareHistory.push(i * numColumns + j + 8);
+              console.log('col add square +8   ',...workSquareHistory);
             }
           }
         }
@@ -134,16 +139,18 @@ export default function App() {
             workBoard[i] === ' ' &&
             (workBoard[i + 1] !== ' ' &&
               workBoard[i + 1] !== '' &&
-              j % 8 <  7 &&
-              (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
-                (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')) |
+              i % 8 <  7 &&
+              (workBoard[i + 8] !== undefined && workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
+                (workBoard[i - 8] !== undefined && workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')) |
               (workBoard[i - 1] !== ' ' &&
                 workBoard[i - 1] !== '' &&
-                j % 8 >  0 &&
-                (workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
-                  (workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))
+                i % 8 >  0 &&
+                (workBoard[i + 8] !== undefined && workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
+                  (workBoard[i - 8] !== undefined && workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))
           ) {
             workBoard[i] = '';
+            workSquareHistory.splice(workSquareHistory.indexOf(i),1);
+            console.log('remove corner',i,'   ',...workSquareHistory);
           }
         }
       }
@@ -165,11 +172,15 @@ export default function App() {
               if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
                 workMessage = 'Word not found';
               }
-              if ((i - 1) % 8 >= 0) {
+              if (i % 8 > 0) {
                 workBoard[i - 1] = '';
+                console.log('remove word row left',i - 1,'   ',...workSquareHistory);
+                workSquareHistory.splice(workSquareHistory.indexOf(i - 1),1);
               }
-              if ((i + 3) % 8 <= 7 && i + 3 < 64) {
+              if (i % 8 <= 4 && i + 3 < 64) {
                 workBoard[i + 3] = '';
+                console.log('remove word row right',i + 3,'   ',...workSquareHistory);
+                workSquareHistory.splice(workSquareHistory.indexOf(i + 3),1);
               }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
@@ -178,6 +189,7 @@ export default function App() {
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
+              console.log('add square row duplicate   ',...workSquareHistory);
             }
           }
         }
@@ -204,9 +216,16 @@ export default function App() {
               }
               if (i * numColumns + j - numRows >= 0) {
                 workBoard[i * numColumns + j - numRows] = '';
+                console.log('remove col word top',i * numColumns + j - numRows,
+                    workSquareHistory.indexOf(i * numColumns + j - numRows),'   ',...workSquareHistory);
+                workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j - numRows),1);            
               }
               if (i * numColumns + j + numRows * 3 < 64) {
                 workBoard[i * numColumns + j + numRows * 3] = '';
+                console.log('remove col word bottom',i * numColumns + j + numRows * 3,
+                    workSquareHistory.indexOf(i * numColumns + j + numRows * 3),j,i,'   ',...workSquareHistory);
+                if (workSquareHistory.indexOf(i * numColumns + j + numRows * 3) !== -1) {
+                workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j + numRows * 3),1)};
               }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
@@ -215,10 +234,12 @@ export default function App() {
               workLetterHistory.pop();
               workLetterHistory.pop();
               workMessage = 'Duplicate word - word rejected';
+              console.log('add square col duplicate   ',...workSquareHistory);
             }
           }
         }
       }
+  //    console.log('workSquareHistory end   ', ...workSquareHistory);
       // End of Game check
       if (workBoard.indexOf(' ') === -1) {
         workMessage = 'Game completed';
