@@ -95,7 +95,7 @@ export default function App() {
       // add letter to board
       workBoard[item] = value.trim();
       workLetterHistory.push(item);
-      console.log('remove Letter   ', ...workSquareHistory);
+      console.log('remove Letter',value,item,'   ', ...workSquareHistory);
       workSquareHistory.splice(workSquareHistory.indexOf(item),1);
       // mark squares on board that can be used (both sides of letter)
       //  - rows
@@ -105,12 +105,12 @@ export default function App() {
             if (i > 0 && i % 8 !== 0 && workBoard[i - 1] === '') {
               workBoard[i - 1] = ' ';
               workSquareHistory.push(i - 1);
-              console.log('row add square -1',i - 1,'   ',...workSquareHistory);
+              console.log('row add square left',i - 1,'   ',...workSquareHistory);
             }
             if (i < numRows * numColumns && i % 8 !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
               workSquareHistory.push(i + 1);
-              console.log('row add square +1',i + 1,'   ',...workSquareHistory);
+              console.log('row add square right',i + 1,'   ',...workSquareHistory);
             }
           }
         }
@@ -122,12 +122,12 @@ export default function App() {
             if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
               workBoard[i * numColumns + j - 8] = ' ';
               workSquareHistory.push(i * numColumns + j - 8);
-              console.log('col add square -8   ',...workSquareHistory);
+              console.log('col add square below',i,j,i * numColumns + j - 8,'   ',...workSquareHistory);
             }
             if (i < numRows * numColumns && workBoard[i * numColumns + j + 8] === '') {
               workBoard[i * numColumns + j + 8] = ' ';
               workSquareHistory.push(i * numColumns + j + 8);
-              console.log('col add square +8   ',...workSquareHistory);
+              console.log('col add square above',i * numColumns + j + 8,'   ',...workSquareHistory);
             }
           }
         }
@@ -174,13 +174,15 @@ export default function App() {
               }
               if (i % 8 > 0) {
                 workBoard[i - 1] = '';
+                if (workSquareHistory.indexOf(i - 1) !== -1) {
+                  workSquareHistory.splice(workSquareHistory.indexOf(i - 1),1)};
                 console.log('remove word row left',i - 1,'   ',...workSquareHistory);
-                workSquareHistory.splice(workSquareHistory.indexOf(i - 1),1);
               }
               if (i % 8 <= 4 && i + 3 < 64) {
                 workBoard[i + 3] = '';
+                if (workSquareHistory.indexOf(i + 3) !== -1) {
+                workSquareHistory.splice(workSquareHistory.indexOf(i + 3),1)};
                 console.log('remove word row right',i + 3,'   ',...workSquareHistory);
-                workSquareHistory.splice(workSquareHistory.indexOf(i + 3),1);
               }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
@@ -216,16 +218,19 @@ export default function App() {
               }
               if (i * numColumns + j - numRows >= 0) {
                 workBoard[i * numColumns + j - numRows] = '';
+                console.log('remove col word top indexOf **',i,j,workSquareHistory.indexOf(i * numColumns + j - numRows));
+                if (workSquareHistory.indexOf(i * numColumns + j - numRows) !== -1) {
+                  workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j - numRows),1)};
                 console.log('remove col word top',i * numColumns + j - numRows,
-                    workSquareHistory.indexOf(i * numColumns + j - numRows),'   ',...workSquareHistory);
-                workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j - numRows),1);            
+                    workSquareHistory.indexOf(i * numColumns + j - numRows),'   ',...workSquareHistory);            
               }
               if (i * numColumns + j + numRows * 3 < 64) {
                 workBoard[i * numColumns + j + numRows * 3] = '';
+                console.log('remove col word bottom indexOf **  ',i,j,workSquareHistory.indexOf(i * numColumns + j + numRows * 3));
+                if (workSquareHistory.indexOf(i * numColumns + j + numRows * 3) !== -1) {
+                  workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j + numRows * 3),1)};
                 console.log('remove col word bottom',i * numColumns + j + numRows * 3,
                     workSquareHistory.indexOf(i * numColumns + j + numRows * 3),j,i,'   ',...workSquareHistory);
-                if (workSquareHistory.indexOf(i * numColumns + j + numRows * 3) !== -1) {
-                workSquareHistory.splice(workSquareHistory.indexOf(i * numColumns + j + numRows * 3),1)};
               }
             } else {
               workBoard[workLetterHistory[workLetterHistory.length - 1]] = '';
@@ -239,7 +244,6 @@ export default function App() {
           }
         }
       }
-  //    console.log('workSquareHistory end   ', ...workSquareHistory);
       // End of Game check
       if (workBoard.indexOf(' ') === -1) {
         workMessage = 'Game completed';
