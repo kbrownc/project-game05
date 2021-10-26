@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { globalStyles } from './global';
-import { allWords } from './ThreeLetterWords';
+import { wordDictionary } from './WordDictionary';
 import {
   Text,
   View,
@@ -12,12 +12,6 @@ import {
   Alert,
 } from 'react-native';
 
-let wordDictionary = [];
-
-for (let i = 0; i < allWords.length; i += 3) {
-  wordDictionary.push(allWords.substring(i, i + 3));
-}
-
 const numColumns = 8;
 const numRows = 8;
 
@@ -26,11 +20,10 @@ let randomNumber = Math.floor(Math.random() * 63);
 newBoard[randomNumber] = ' ';
 
 export default function App() {
-  const [{ message, score, board, letterHistory, previousBoard }, setGameState] = useState({
+  const [{ message, score, board, previousBoard }, setGameState] = useState({
     message: 'Enter 1st word',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
-    letterHistory: [],
     previousBoard: [],
   });
 
@@ -53,7 +46,6 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      console.log('RESET');
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
       newBoard[randomNumber] = ' ';
@@ -61,7 +53,6 @@ export default function App() {
         message: 'Enter 1st word',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
-        letterHistory: [],
         previousBoard: [],
       };
     });
@@ -69,7 +60,8 @@ export default function App() {
 
   // press Alert button
   const pressAlert = () => {
-    const alertMessage = 'These are the instructions on how to play this game';
+    const alertMessage =
+      'Only 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another.';
     Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
   };
 
@@ -78,23 +70,19 @@ export default function App() {
   //    Neeed to check if we are at end of game
   //    Need to update score
   //
-  //  letterHistory - an array listing the letters entered onto the board in the order added
-  //  previousBoard - an array listing what the board looked like after the previous turn
+  //   previousBoard - an array listing what the board looked like after the previous turn
   //   wordList - list of the 3-letter words on the board
   const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
-      console.log('ENTERLETTER', value, item);
-      let workLetterHistory = JSON.parse(JSON.stringify(prevGameState.letterHistory));
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      let workMessage = 'enter a letter';
+      let workMessage = '';
       let wordList = {};
       let word = '';
       let i;
       let j;
       // add letter to board
       workBoard[item] = value.trim();
-      workLetterHistory.push(item);
       // mark squares on board that can be used (both sides of letter)
       //  - rows
       for (j = 0; j < numRows; j++) {
@@ -129,14 +117,22 @@ export default function App() {
             workBoard[i] === ' ' &&
             (workBoard[i + 1] !== ' ' &&
               workBoard[i + 1] !== '' &&
-              i % numColumns <  7 &&
-              (workBoard[i + numColumns] !== undefined && workBoard[i + numColumns] !== ' ' && workBoard[i + numColumns] !== '') |
-                (workBoard[i - numColumns] !== undefined && workBoard[i - numColumns] !== ' ' && workBoard[i - numColumns] !== '')) |
+              i % numColumns < 7 &&
+              (workBoard[i + numColumns] !== undefined &&
+                workBoard[i + numColumns] !== ' ' &&
+                workBoard[i + numColumns] !== '') |
+                (workBoard[i - numColumns] !== undefined &&
+                  workBoard[i - numColumns] !== ' ' &&
+                  workBoard[i - numColumns] !== '')) |
               (workBoard[i - 1] !== ' ' &&
                 workBoard[i - 1] !== '' &&
-                i % numColumns >  0 &&
-                (workBoard[i + numColumns] !== undefined && workBoard[i + numColumns] !== ' ' && workBoard[i + numColumns] !== '') |
-                  (workBoard[i - numColumns] !== undefined && workBoard[i - numColumns] !== ' ' && workBoard[i - numColumns] !== ''))
+                i % numColumns > 0 &&
+                (workBoard[i + numColumns] !== undefined &&
+                  workBoard[i + numColumns] !== ' ' &&
+                  workBoard[i + numColumns] !== '') |
+                  (workBoard[i - numColumns] !== undefined &&
+                    workBoard[i - numColumns] !== ' ' &&
+                    workBoard[i - numColumns] !== ''))
           ) {
             workBoard[i] = '';
           }
@@ -156,22 +152,19 @@ export default function App() {
           ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-                workMessage = 'Word not found - ' + word;
-                workLetterHistory.pop();
-                workBoard = workPreviousBoard;
+              workMessage = 'Word not found - ' + word;
+              workBoard = workPreviousBoard;
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
                 if (i % numColumns > 0) {
-                workBoard[i - 1] = '';
+                  workBoard[i - 1] = '';
                 }
                 if (i % numColumns <= 4 && i + 3 < 64) {
-                workBoard[i + 3] = '';
+                  workBoard[i + 3] = '';
                 }
-                workMessage = 'Enter next Letter';
               } else {
                 workMessage = 'Duplicate word - word rejected - ' + word;
-                workLetterHistory.pop();
                 workBoard = workPreviousBoard;
               }
             }
@@ -194,27 +187,27 @@ export default function App() {
               workBoard[i * numColumns + j + numRows] +
               workBoard[i * numColumns + j + numRows * 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-                workMessage = 'Word not found - ' + word;
-                workLetterHistory.pop();
-                workBoard = workPreviousBoard;
+              workMessage = 'Word not found - ' + word;
+              workBoard = workPreviousBoard;
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
                 if (i * numColumns + j - numRows >= 0) {
-                workBoard[i * numColumns + j - numRows] = '';           
+                  workBoard[i * numColumns + j - numRows] = '';
                 }
                 if (i * numColumns + j + numRows * 3 < 64) {
-                workBoard[i * numColumns + j + numRows * 3] = '';
+                  workBoard[i * numColumns + j + numRows * 3] = '';
                 }
-                workMessage = 'Enter next Letter';
               } else {
                 workMessage = 'Duplicate word - word rejected - ' + word;
-                workLetterHistory.pop();
                 workBoard = workPreviousBoard;
               }
             }
           }
         }
+      }
+      if (workMessage === '') {
+        workMessage = 'Enter next Letter';
       }
       // End of Game check
       if (workBoard.indexOf(' ') === -1) {
@@ -225,7 +218,6 @@ export default function App() {
         message: workMessage,
         score: Object.keys(wordList).length,
         board: workBoard,
-        letterHistory: workLetterHistory,
         previousBoard: workPreviousBoard,
       };
     });
@@ -240,7 +232,7 @@ export default function App() {
     >
       <View style={globalStyles.container}>
         <View style={globalStyles.nav}>
-          <Button onPress={pressReset} title="Reset" color="red" />
+          <Button onPress={pressReset} title="Reset" color="green" />
           <View style={globalStyles.itemNav}>
             <Text style={globalStyles.itemText}>Score</Text>
           </View>
