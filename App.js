@@ -23,7 +23,7 @@ const numRows = 8;
 
 let newBoard = new Array(numColumns * numRows).fill('');
 let randomNumber = Math.floor(Math.random() * 63);
-newBoard[0] = ' ';
+newBoard[randomNumber] = ' ';
 
 export default function App() {
   const [{ message, score, board, letterHistory, previousBoard }, setGameState] = useState({
@@ -56,7 +56,7 @@ export default function App() {
       console.log('RESET');
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
-      newBoard[0] = ' ';
+      newBoard[randomNumber] = ' ';
       return {
         message: 'Enter 1st word',
         score: 0,
@@ -100,10 +100,10 @@ export default function App() {
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
           if (workBoard[i] !== '' && workBoard[i] !== ' ') {
-            if (i > 0 && i % 8 !== 0 && workBoard[i - 1] === '') {
+            if (i > 0 && i % numColumns !== 0 && workBoard[i - 1] === '') {
               workBoard[i - 1] = ' ';
             }
-            if (i < numRows * numColumns && i % 8 !== 7 && workBoard[i + 1] === '') {
+            if (i < numRows * numColumns && i % numColumns !== 7 && workBoard[i + 1] === '') {
               workBoard[i + 1] = ' ';
             }
           }
@@ -113,11 +113,11 @@ export default function App() {
       for (j = 0; j < numColumns; j++) {
         for (i = 0; i < numRows; i++) {
           if (workBoard[i * numColumns + j] !== '' && workBoard[i * numColumns + j] !== ' ') {
-            if (i > 0 && workBoard[i * numColumns + j - 8] === '') {
-              workBoard[i * numColumns + j - 8] = ' ';
+            if (i > 0 && workBoard[i * numColumns + j - numRows] === '') {
+              workBoard[i * numColumns + j - numRows] = ' ';
             }
-            if (i < numRows * numColumns && workBoard[i * numColumns + j + 8] === '') {
-              workBoard[i * numColumns + j + 8] = ' ';
+            if (i < numRows * numColumns && workBoard[i * numColumns + j + numRows] === '') {
+              workBoard[i * numColumns + j + numRows] = ' ';
             }
           }
         }
@@ -129,14 +129,14 @@ export default function App() {
             workBoard[i] === ' ' &&
             (workBoard[i + 1] !== ' ' &&
               workBoard[i + 1] !== '' &&
-              i % 8 <  7 &&
-              (workBoard[i + 8] !== undefined && workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
-                (workBoard[i - 8] !== undefined && workBoard[i - 8] !== ' ' && workBoard[i - 8] !== '')) |
+              i % numColumns <  7 &&
+              (workBoard[i + numColumns] !== undefined && workBoard[i + numColumns] !== ' ' && workBoard[i + numColumns] !== '') |
+                (workBoard[i - numColumns] !== undefined && workBoard[i - numColumns] !== ' ' && workBoard[i - numColumns] !== '')) |
               (workBoard[i - 1] !== ' ' &&
                 workBoard[i - 1] !== '' &&
-                i % 8 >  0 &&
-                (workBoard[i + 8] !== undefined && workBoard[i + 8] !== ' ' && workBoard[i + 8] !== '') |
-                  (workBoard[i - 8] !== undefined && workBoard[i - 8] !== ' ' && workBoard[i - 8] !== ''))
+                i % numColumns >  0 &&
+                (workBoard[i + numColumns] !== undefined && workBoard[i + numColumns] !== ' ' && workBoard[i + numColumns] !== '') |
+                  (workBoard[i - numColumns] !== undefined && workBoard[i - numColumns] !== ' ' && workBoard[i - numColumns] !== ''))
           ) {
             workBoard[i] = '';
           }
@@ -156,23 +156,21 @@ export default function App() {
           ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-                workMessage = 'Word not found';
-                console.log('Word not found',word);
+                workMessage = 'Word not found - ' + word;
                 workLetterHistory.pop();
                 workBoard = workPreviousBoard;
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
-                if (i % 8 > 0) {
+                if (i % numColumns > 0) {
                 workBoard[i - 1] = '';
                 }
-                if (i % 8 <= 4 && i + 3 < 64) {
+                if (i % numColumns <= 4 && i + 3 < 64) {
                 workBoard[i + 3] = '';
                 }
                 workMessage = 'Enter next Letter';
               } else {
-                workMessage = 'Duplicate word - word rejected';
-                console.log('Dup word',word);
+                workMessage = 'Duplicate word - word rejected - ' + word;
                 workLetterHistory.pop();
                 workBoard = workPreviousBoard;
               }
@@ -196,8 +194,7 @@ export default function App() {
               workBoard[i * numColumns + j + numRows] +
               workBoard[i * numColumns + j + numRows * 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-                workMessage = 'Word not found';
-                console.log('Word not found',word);
+                workMessage = 'Word not found - ' + word;
                 workLetterHistory.pop();
                 workBoard = workPreviousBoard;
             } else {
@@ -211,8 +208,7 @@ export default function App() {
                 }
                 workMessage = 'Enter next Letter';
               } else {
-                workMessage = 'Duplicate word - word rejected';
-                console.log('Dup word',word);
+                workMessage = 'Duplicate word - word rejected - ' + word;
                 workLetterHistory.pop();
                 workBoard = workPreviousBoard;
               }
