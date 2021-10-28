@@ -51,13 +51,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center',
   },
   messageRow: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-    color: 'black',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    flex: .5,
   },
   board: {
     flex: 7,

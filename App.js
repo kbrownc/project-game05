@@ -241,11 +241,9 @@ export default function App() {
           </View>
           <Button onPress={pressAlert} title="About" color="green" />
         </View>
-        <View style={globalStyles.message}>
           <View style={globalStyles.messageRow}>
             <Text style={globalStyles.message}>{message}</Text>
           </View>
-        </View>
         <View style={globalStyles.board}>
           <FlatList
             data={board}
