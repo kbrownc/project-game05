@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { globalStyles } from './global';
 import { wordDictionary } from './WordDictionary';
 import {
@@ -10,6 +10,7 @@ import {
   Button,
   TextInput,
   Alert,
+  AsyncStorage,
 } from 'react-native';
 
 const numColumns = 8;
@@ -46,6 +47,8 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
+      console.clear();
+      console.log('Reset');
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
       newBoard[randomNumber] = ' ';
@@ -56,6 +59,63 @@ export default function App() {
         previousBoard: [],
       };
     });
+  }, []);
+
+  // SAVE board
+  const pressSave = async () => {
+    try {
+      console.log('save *******');
+      await AsyncStorage.setItem('Board', JSON.stringify(board));
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  // LOAD board if previously saved
+  const load = useCallback(async () => {
+    let savedBoard = await AsyncStorage.getItem('Board');
+    setGameState(prevGameState => {
+      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      if (savedBoard !== null) {
+        workBoard = JSON.parse(savedBoard);
+      }
+      return {
+        ...prevGameState,
+        board: JSON.parse(JSON.stringify(workBoard)),
+      };
+    });
+  }, []);
+
+  //   const load = useCallback(() => {
+  //     AsyncStorage.getItem('Board').then((savedBoard) => {
+  //       setGameState(prevGameState => {
+  //         let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+  //         if (savedBoard !== null) {
+  //           workBoard = JSON.parse(savedBoard);
+  //         }
+  //         return {
+  //           ...prevGameState,
+  //           board: JSON.parse(JSON.stringify(workBoard)),
+  //         };
+  //       });
+  //     });
+  // }, []);  
+
+  // REMOVED previously saved board if it exists
+  const remove = async () => {
+    try {
+      console.log('remove *******');
+      await AsyncStorage.removeItem('Board');
+    } catch (err) {
+      alert(err);
+    }
+  };
+
+  // LOAD and REMOVE saved board after render
+  useEffect(() => {
+    console.log('useEffect *******');
+    load();
+    remove();
   }, []);
 
   // press Alert button
@@ -239,11 +299,12 @@ export default function App() {
           <View style={globalStyles.itemNav}>
             <Text style={globalStyles.itemText}>{score}</Text>
           </View>
+          <Button onPress={pressSave} title="Save" color="red" />
           <Button onPress={pressAlert} title="About" color="green" />
         </View>
-          <View style={globalStyles.messageRow}>
-            <Text style={globalStyles.message}>{message}</Text>
-          </View>
+        <View style={globalStyles.messageRow}>
+          <Text style={globalStyles.message}>{message}</Text>
+        </View>
         <View style={globalStyles.board}>
           <FlatList
             data={board}
