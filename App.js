@@ -64,7 +64,6 @@ export default function App() {
   // SAVE board
   const pressSave = async () => {
     try {
-      console.log('save *******');
       await AsyncStorage.setItem('Board', JSON.stringify(board));
     } catch (error) {
       alert(error);
@@ -86,25 +85,9 @@ export default function App() {
     });
   }, []);
 
-  //   const load = useCallback(() => {
-  //     AsyncStorage.getItem('Board').then((savedBoard) => {
-  //       setGameState(prevGameState => {
-  //         let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-  //         if (savedBoard !== null) {
-  //           workBoard = JSON.parse(savedBoard);
-  //         }
-  //         return {
-  //           ...prevGameState,
-  //           board: JSON.parse(JSON.stringify(workBoard)),
-  //         };
-  //       });
-  //     });
-  // }, []);  
-
   // REMOVED previously saved board if it exists
   const remove = async () => {
     try {
-      console.log('remove *******');
       await AsyncStorage.removeItem('Board');
     } catch (err) {
       alert(err);
@@ -113,7 +96,6 @@ export default function App() {
 
   // LOAD and REMOVE saved board after render
   useEffect(() => {
-    console.log('useEffect *******');
     load();
     remove();
   }, []);
