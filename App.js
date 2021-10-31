@@ -22,7 +22,7 @@ newBoard[randomNumber] = ' ';
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
-    message: 'Enter 1st word',
+    message: 'Enter 1st letter',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
     previousBoard: [],
@@ -47,13 +47,11 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      console.clear();
-      console.log('Reset');
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
       newBoard[randomNumber] = ' ';
       return {
-        message: 'Enter 1st word',
+        message: 'Enter 1st letter',
         score: 0,
         board: JSON.parse(JSON.stringify(newBoard)),
         previousBoard: [],
@@ -61,25 +59,30 @@ export default function App() {
     });
   }, []);
 
-  // SAVE board
-  const pressSave = async () => {
-    try {
-      await AsyncStorage.setItem('Board', JSON.stringify(board));
-    } catch (error) {
-      alert(error);
-    }
-  };
+  const pressSave = useCallback(async () => {
+    await AsyncStorage.setItem('Board', JSON.stringify(board));
+    setGameState(prevGameState => {
+      let workMessage = 'Game saved';
+      return {
+        ...prevGameState,
+        message: workMessage,
+      };
+    });
+  }, [board]);
 
   // LOAD board if previously saved
   const load = useCallback(async () => {
     let savedBoard = await AsyncStorage.getItem('Board');
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      let workMessage = prevGameState.message;
       if (savedBoard !== null) {
         workBoard = JSON.parse(savedBoard);
+        workMessage = 'Previous game loaded';
       }
       return {
         ...prevGameState,
+        message: workMessage,
         board: JSON.parse(JSON.stringify(workBoard)),
       };
     });
