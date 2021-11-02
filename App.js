@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { globalStyles } from './global';
 import { wordDictionary } from './WordDictionary';
+import { letterPoints } from './LetterPoints';
 import {
   Text,
   View,
@@ -106,7 +107,7 @@ export default function App() {
   // press Alert button
   const pressAlert = () => {
     const alertMessage =
-      'Only 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another.';
+      'Only 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
     Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
   };
 
@@ -124,6 +125,7 @@ export default function App() {
       let workMessage = '';
       let wordList = {};
       let word = '';
+      let workScore = 0;
       let i;
       let j;
       // add letter to board
@@ -202,6 +204,14 @@ export default function App() {
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
+                // Calculate total value of word
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i] }).point;   
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i + 1] }).point;  
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i + 2] }).point;  
+                //
                 if (i % numColumns > 0) {
                   workBoard[i - 1] = '';
                 }
@@ -237,6 +247,12 @@ export default function App() {
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i * numColumns + j] }).point;  
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i * numColumns + j + numRows] }).point; 
+                workScore = workScore + letterPoints.find((item) => {
+                  return item.letter === workBoard[i * numColumns + j + numRows * 2] }).point; 
                 if (i * numColumns + j - numRows >= 0) {
                   workBoard[i * numColumns + j - numRows] = '';
                 }
@@ -261,7 +277,7 @@ export default function App() {
       return {
         ...prevGameState,
         message: workMessage,
-        score: Object.keys(wordList).length,
+        score: workScore,
         board: workBoard,
         previousBoard: workPreviousBoard,
       };
