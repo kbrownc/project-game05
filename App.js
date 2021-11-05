@@ -28,6 +28,8 @@ export default function App() {
     board: JSON.parse(JSON.stringify(newBoard)),
     previousBoard: [],
   });
+  const [time, setTime] = useState(300);
+  const [timerOn, setTimerOn] = useState(true);
 
   // render board
   const renderBoard = ({ item, index }) => {
@@ -39,7 +41,7 @@ export default function App() {
           autoCapitalze="characters"
           maxLength={2}
           value={item}
-          editable={item === ' ' ? true : false}
+          editable={item === ' ' && time > 0 ? true : false}
         />
       </View>
     );
@@ -51,6 +53,8 @@ export default function App() {
       newBoard[randomNumber] = '';
       randomNumber = Math.floor(Math.random() * 63);
       newBoard[randomNumber] = ' ';
+      setTimerOn(true);
+      setTime(300);
       return {
         message: 'Enter 1st letter',
         score: 0,
@@ -103,6 +107,19 @@ export default function App() {
     load();
     remove();
   }, []);
+
+  // Set and update timer
+  useEffect(() => {
+    let interval = null;
+    if (timerOn && time > 0) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timerOn, time]);
 
   // press Alert button
   const pressAlert = () => {
@@ -205,12 +222,21 @@ export default function App() {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
                 // Calculate total value of word
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i] }).point;   
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i + 1] }).point;  
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i + 2] }).point;  
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i];
+                  }).point;
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i + 1];
+                  }).point;
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i + 2];
+                  }).point;
                 //
                 if (i % numColumns > 0) {
                   workBoard[i - 1] = '';
@@ -247,12 +273,21 @@ export default function App() {
             } else {
               if (wordList[word] === undefined) {
                 wordList[word] = 1;
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i * numColumns + j] }).point;  
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i * numColumns + j + numRows] }).point; 
-                workScore = workScore + letterPoints.find((item) => {
-                  return item.letter === workBoard[i * numColumns + j + numRows * 2] }).point; 
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i * numColumns + j];
+                  }).point;
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i * numColumns + j + numRows];
+                  }).point;
+                workScore =
+                  workScore +
+                  letterPoints.find(item => {
+                    return item.letter === workBoard[i * numColumns + j + numRows * 2];
+                  }).point;
                 if (i * numColumns + j - numRows >= 0) {
                   workBoard[i * numColumns + j - numRows] = '';
                 }
@@ -295,12 +330,17 @@ export default function App() {
         <View style={globalStyles.nav}>
           <Button onPress={pressReset} title="Reset" color="green" />
           <View style={globalStyles.itemNav}>
-            <Text style={globalStyles.itemText}>Score</Text>
+            <Text style={globalStyles.itemText1}>
+              {'0' + Math.floor(time / 60) + ':' + ('0' + Math.floor(time % 60)).slice(-2)}
+            </Text>
           </View>
           <View style={globalStyles.itemNav}>
-            <Text style={globalStyles.itemText}>{score}</Text>
+            <Text style={globalStyles.itemText1}>Score</Text>
           </View>
-          <Button onPress={pressSave} title="Save" color="red" />
+          <View style={globalStyles.itemNav}>
+            <Text style={globalStyles.itemText1}>{score}</Text>
+          </View>
+          <Button onPress={pressSave} title="Save" color="green" />
           <Button onPress={pressAlert} title="About" color="green" />
         </View>
         <View style={globalStyles.messageRow}>

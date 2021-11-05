@@ -41,6 +41,11 @@ export const globalStyles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
   },
+  itemText1: {
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
   message: {
     flex: 1,
     justifyContent: 'center',
