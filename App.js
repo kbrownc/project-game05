@@ -18,8 +18,9 @@ const numColumns = 8;
 const numRows = 8;
 
 let newBoard = new Array(numColumns * numRows).fill('');
-let randomNumber = Math.floor(Math.random() * 63);
-newBoard[randomNumber] = ' ';
+const alphabet = 
+      ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+const alphabet2 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
@@ -50,15 +51,18 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      newBoard[randomNumber] = '';
-      randomNumber = Math.floor(Math.random() * 63);
-      newBoard[randomNumber] = ' ';
+      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      workBoard.fill('');
+      let randomNumberIndex = Math.floor(Math.random() * 63);
+      let randomNumberValue = alphabet2.substring(Math.floor(Math.random() * 25),Math.floor(Math.random() * 25));
+      console.log(randomNumberValue);
+      enterLetter(randomNumberValue,randomNumberIndex);
       setTimerOn(true);
       setTime(300);
       return {
         message: 'Enter 1st letter',
         score: 0,
-        board: JSON.parse(JSON.stringify(newBoard)),
+        board: JSON.parse(JSON.stringify(workBoard)),
         previousBoard: [],
       };
     });
@@ -93,7 +97,7 @@ export default function App() {
     });
   }, []);
 
-  // REMOVED previously saved board if it exists
+  // Remove previously saved board if it exists
   const remove = async () => {
     try {
       await AsyncStorage.removeItem('Board');
@@ -102,13 +106,13 @@ export default function App() {
     }
   };
 
-  // LOAD and REMOVE saved board after render
+  // Load and Remove saved board after render, but onlu on app startup
   useEffect(() => {
     load();
     remove();
   }, []);
 
-  // Set and update timer
+  // Set and update timer whenever 'timerOn' or 'time' changes
   useEffect(() => {
     let interval = null;
     if (timerOn && time > 0) {
@@ -120,6 +124,26 @@ export default function App() {
     }
     return () => clearInterval(interval);
   }, [timerOn, time]);
+
+  // Load random letters in random spots when app loads
+  useEffect(() => {
+    let randomNumberIndex = Math.floor(Math.random() * 63);
+    let randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
+    console.log('useEffect',randomNumberIndex,randomNumberValue);
+    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumberIndex = Math.floor(Math.random() * 63);
+    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
+    console.log('useEffect',randomNumberIndex,randomNumberValue);
+    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumberIndex = Math.floor(Math.random() * 63);
+    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
+    console.log('useEffect',randomNumberIndex,randomNumberValue);
+    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumberIndex = Math.floor(Math.random() * 63);
+    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
+    console.log('useEffect',randomNumberIndex,randomNumberValue);
+    enterLetter(randomNumberValue,randomNumberIndex);
+  }, []);
 
   // press Alert button
   const pressAlert = () => {
@@ -174,7 +198,7 @@ export default function App() {
           }
         }
       }
-      // remove squares on board that cannot be used (those tht have letters on 2 corner sides)
+      // remove squares on board that cannot be used (those that have letters on 2 corner sides)
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns; i++) {
           if (
@@ -202,7 +226,7 @@ export default function App() {
           }
         }
       }
-      //  find the words on the board (and mark squares at ends as no longer available)
+      //  find the words on the board for spelling/duplicates (and mark squares at ends as no longer available)
       //  1) find words on rows
       for (j = 0; j < numRows; j++) {
         for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
