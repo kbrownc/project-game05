@@ -18,9 +18,7 @@ const numColumns = 8;
 const numRows = 8;
 
 let newBoard = new Array(numColumns * numRows).fill('');
-const alphabet = 
-      ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-const alphabet2 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
@@ -54,9 +52,9 @@ export default function App() {
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
       workBoard.fill('');
       let randomNumberIndex = Math.floor(Math.random() * 63);
-      let randomNumberValue = alphabet2.substring(Math.floor(Math.random() * 25),Math.floor(Math.random() * 25));
-      console.log(randomNumberValue);
-      enterLetter(randomNumberValue,randomNumberIndex);
+      let randomNumber = Math.floor(Math.random() * 25);
+      let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+      enterLetter(randomNumberValue, randomNumberIndex);
       setTimerOn(true);
       setTime(300);
       return {
@@ -128,21 +126,21 @@ export default function App() {
   // Load random letters in random spots when app loads
   useEffect(() => {
     let randomNumberIndex = Math.floor(Math.random() * 63);
-    let randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
-    console.log('useEffect',randomNumberIndex,randomNumberValue);
-    enterLetter(randomNumberValue,randomNumberIndex);
+    let randomNumber = Math.floor(Math.random() * 25);
+    let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+    enterLetter(randomNumberValue, randomNumberIndex);
     randomNumberIndex = Math.floor(Math.random() * 63);
-    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
-    console.log('useEffect',randomNumberIndex,randomNumberValue);
-    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumber = Math.floor(Math.random() * 25);
+    randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+    enterLetter(randomNumberValue, randomNumberIndex);
     randomNumberIndex = Math.floor(Math.random() * 63);
-    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
-    console.log('useEffect',randomNumberIndex,randomNumberValue);
-    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumber = Math.floor(Math.random() * 25);
+    randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+    enterLetter(randomNumberValue, randomNumberIndex);
     randomNumberIndex = Math.floor(Math.random() * 63);
-    randomNumberValue = alphabet[Math.floor(Math.random() * 25)];
-    console.log('useEffect',randomNumberIndex,randomNumberValue);
-    enterLetter(randomNumberValue,randomNumberIndex);
+    randomNumber = Math.floor(Math.random() * 25);
+    randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+    enterLetter(randomNumberValue, randomNumberIndex);
   }, []);
 
   // press Alert button
