@@ -49,18 +49,17 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     setGameState(prevGameState => {
-      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      workBoard.fill('');
+      let workBoard = JSON.parse(JSON.stringify(newBoard));
       let randomNumberIndex = Math.floor(Math.random() * 63);
       let randomNumber = Math.floor(Math.random() * 25);
       let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      enterLetter(randomNumberValue, randomNumberIndex);
+      const eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
       setTimerOn(true);
       setTime(300);
       return {
         message: 'Enter 1st letter',
         score: 0,
-        board: JSON.parse(JSON.stringify(workBoard)),
+        board: JSON.parse(JSON.stringify(eLL.board)),
         previousBoard: [],
       };
     });
@@ -150,17 +149,19 @@ export default function App() {
     Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
   };
 
-  // enter a Letter from keyboard
-  //    Need to validate entry of letters (spelling and duplicates)
-  //    Neeed to check if we are at end of game
-  //    Need to update score
+  // enterLetterLogic function
   //
-  //   previousBoard - an array listing what the board looked like after the previous turn
-  //   wordList - list of the 3-letter words on the board
-  const enterLetter = useCallback((value, item) => {
-    setGameState(prevGameState => {
-      let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
+  //    enter a Letter from keyboard
+  //      Need to validate entry of letters (spelling and duplicates)
+  //      Neeed to check if we are at end of game
+  //      Need to update score
+  //    previousBoard - an array listing what the board looked like after the previous turn
+  //    wordList - list of the 3-letter words on the board
+  const enterLetterLogic = (value, item, tempBoard) => {
+      // let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      // let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      let workBoard = JSON.parse(JSON.stringify(tempBoard));
+      let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
       let workMessage = '';
       let wordList = {};
       let word = '';
@@ -332,11 +333,24 @@ export default function App() {
         workMessage = 'Game completed';
       }
       return {
-        ...prevGameState,
         message: workMessage,
         score: workScore,
         board: workBoard,
         previousBoard: workPreviousBoard,
+      };
+  };
+
+  // Enter a Letter from keyboard
+  // - calls enterLetterLogic which has detailed logic
+  const enterLetter = useCallback((value, item) => {
+    setGameState(prevGameState => {
+      const eLL = enterLetterLogic(value, item, prevGameState.board);
+      return {
+        ...prevGameState,
+        message: eLL.message,
+        score: eLL.score,
+        board: eLL.board,
+        previousBoard: eLL.previousBoard,
       };
     });
   }, []);
