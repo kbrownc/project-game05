@@ -53,7 +53,19 @@ export default function App() {
       let randomNumberIndex = Math.floor(Math.random() * 63);
       let randomNumber = Math.floor(Math.random() * 25);
       let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      const eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
+      let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
+      randomNumberIndex = Math.floor(Math.random() * 63);
+      randomNumber = Math.floor(Math.random() * 25);
+      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+      randomNumberIndex = Math.floor(Math.random() * 63);
+      randomNumber = Math.floor(Math.random() * 25);
+      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+      randomNumberIndex = Math.floor(Math.random() * 63);
+      randomNumber = Math.floor(Math.random() * 25);
+      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
       setTimerOn(true);
       setTime(300);
       return {
