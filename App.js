@@ -170,186 +170,186 @@ export default function App() {
   //    previousBoard - an array listing what the board looked like after the previous turn
   //    wordList - list of the 3-letter words on the board
   const enterLetterLogic = (value, item, tempBoard) => {
-      // let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      // let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
-      let workBoard = JSON.parse(JSON.stringify(tempBoard));
-      let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
-      let workMessage = '';
-      let wordList = {};
-      let word = '';
-      let workScore = 0;
-      let i;
-      let j;
-      // add letter to board
-      workBoard[item] = value.trim();
-      // mark squares on board that can be used (both sides of letter)
-      //  - rows
-      for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns; i++) {
-          if (workBoard[i] !== '' && workBoard[i] !== ' ') {
-            if (i > 0 && i % numColumns !== 0 && workBoard[i - 1] === '') {
-              workBoard[i - 1] = ' ';
-            }
-            if (i < numRows * numColumns && i % numColumns !== 7 && workBoard[i + 1] === '') {
-              workBoard[i + 1] = ' ';
-            }
+    // let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+    // let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
+    let workBoard = JSON.parse(JSON.stringify(tempBoard));
+    let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
+    let workMessage = '';
+    let wordList = {};
+    let word = '';
+    let workScore = 0;
+    let i;
+    let j;
+    // add letter to board
+    workBoard[item] = value.trim();
+    // mark squares on board that can be used (both sides of letter)
+    //  - rows
+    for (j = 0; j < numRows; j++) {
+      for (i = j * numRows; i < (j + 1) * numColumns; i++) {
+        if (workBoard[i] !== '' && workBoard[i] !== ' ') {
+          if (i > 0 && i % numColumns !== 0 && workBoard[i - 1] === '') {
+            workBoard[i - 1] = ' ';
+          }
+          if (i < numRows * numColumns && i % numColumns !== 7 && workBoard[i + 1] === '') {
+            workBoard[i + 1] = ' ';
           }
         }
       }
-      //  - columns
-      for (j = 0; j < numColumns; j++) {
-        for (i = 0; i < numRows; i++) {
-          if (workBoard[i * numColumns + j] !== '' && workBoard[i * numColumns + j] !== ' ') {
-            if (i > 0 && workBoard[i * numColumns + j - numRows] === '') {
-              workBoard[i * numColumns + j - numRows] = ' ';
-            }
-            if (i < numRows * numColumns && workBoard[i * numColumns + j + numRows] === '') {
-              workBoard[i * numColumns + j + numRows] = ' ';
-            }
+    }
+    //  - columns
+    for (j = 0; j < numColumns; j++) {
+      for (i = 0; i < numRows; i++) {
+        if (workBoard[i * numColumns + j] !== '' && workBoard[i * numColumns + j] !== ' ') {
+          if (i > 0 && workBoard[i * numColumns + j - numRows] === '') {
+            workBoard[i * numColumns + j - numRows] = ' ';
+          }
+          if (i < numRows * numColumns && workBoard[i * numColumns + j + numRows] === '') {
+            workBoard[i * numColumns + j + numRows] = ' ';
           }
         }
       }
-      // remove squares on board that cannot be used (those that have letters on 2 corner sides)
-      for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns; i++) {
-          if (
-            workBoard[i] === ' ' &&
-            (workBoard[i + 1] !== ' ' &&
-              workBoard[i + 1] !== '' &&
-              i % numColumns < 7 &&
+    }
+    // remove squares on board that cannot be used (those that have letters on 2 corner sides)
+    for (j = 0; j < numRows; j++) {
+      for (i = j * numRows; i < (j + 1) * numColumns; i++) {
+        if (
+          workBoard[i] === ' ' &&
+          (workBoard[i + 1] !== ' ' &&
+            workBoard[i + 1] !== '' &&
+            i % numColumns < 7 &&
+            (workBoard[i + numColumns] !== undefined &&
+              workBoard[i + numColumns] !== ' ' &&
+              workBoard[i + numColumns] !== '') |
+              (workBoard[i - numColumns] !== undefined &&
+                workBoard[i - numColumns] !== ' ' &&
+                workBoard[i - numColumns] !== '')) |
+            (workBoard[i - 1] !== ' ' &&
+              workBoard[i - 1] !== '' &&
+              i % numColumns > 0 &&
               (workBoard[i + numColumns] !== undefined &&
                 workBoard[i + numColumns] !== ' ' &&
                 workBoard[i + numColumns] !== '') |
                 (workBoard[i - numColumns] !== undefined &&
                   workBoard[i - numColumns] !== ' ' &&
-                  workBoard[i - numColumns] !== '')) |
-              (workBoard[i - 1] !== ' ' &&
-                workBoard[i - 1] !== '' &&
-                i % numColumns > 0 &&
-                (workBoard[i + numColumns] !== undefined &&
-                  workBoard[i + numColumns] !== ' ' &&
-                  workBoard[i + numColumns] !== '') |
-                  (workBoard[i - numColumns] !== undefined &&
-                    workBoard[i - numColumns] !== ' ' &&
-                    workBoard[i - numColumns] !== ''))
-          ) {
-            workBoard[i] = '';
-          }
+                  workBoard[i - numColumns] !== ''))
+        ) {
+          workBoard[i] = '';
         }
       }
-      //  find the words on the board for spelling/duplicates (and mark squares at ends as no longer available)
-      //  1) find words on rows
-      for (j = 0; j < numRows; j++) {
-        for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
-          if (
-            workBoard[i] !== '' &&
-            workBoard[i + 1] !== '' &&
-            workBoard[i + 2] !== '' &&
-            workBoard[i] !== ' ' &&
-            workBoard[i + 1] !== ' ' &&
-            workBoard[i + 2] !== ' '
-          ) {
-            word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
-            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-              workMessage = 'Word not found - ' + word;
-              workBoard = workPreviousBoard;
-            } else {
-              if (wordList[word] === undefined) {
-                wordList[word] = 1;
-                // Calculate total value of word
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i];
-                  }).point;
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i + 1];
-                  }).point;
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i + 2];
-                  }).point;
-                //
-                if (i % numColumns > 0) {
-                  workBoard[i - 1] = '';
-                }
-                if (i % numColumns <= 4 && i + 3 < 64) {
-                  workBoard[i + 3] = '';
-                }
-              } else {
-                workMessage = 'Duplicate word - word rejected - ' + word;
-                workBoard = workPreviousBoard;
+    }
+    //  find the words on the board for spelling/duplicates (and mark squares at ends as no longer available)
+    //  1) find words on rows
+    for (j = 0; j < numRows; j++) {
+      for (i = j * numRows; i < (j + 1) * numColumns - 2; i++) {
+        if (
+          workBoard[i] !== '' &&
+          workBoard[i + 1] !== '' &&
+          workBoard[i + 2] !== '' &&
+          workBoard[i] !== ' ' &&
+          workBoard[i + 1] !== ' ' &&
+          workBoard[i + 2] !== ' '
+        ) {
+          word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
+          if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
+            workMessage = 'Word not found - ' + word;
+            workBoard = workPreviousBoard;
+          } else {
+            if (wordList[word] === undefined) {
+              wordList[word] = 1;
+              // Calculate total value of word
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i];
+                }).point;
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i + 1];
+                }).point;
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i + 2];
+                }).point;
+              //
+              if (i % numColumns > 0) {
+                workBoard[i - 1] = '';
               }
+              if (i % numColumns <= 4 && i + 3 < 64) {
+                workBoard[i + 3] = '';
+              }
+            } else {
+              workMessage = 'Duplicate word - word rejected - ' + word;
+              workBoard = workPreviousBoard;
             }
           }
         }
       }
-      //  2) find words on columns
-      for (j = 0; j < numColumns; j++) {
-        for (i = 0; i < numRows - 2; i++) {
-          if (
-            workBoard[i * numColumns + j] !== '' &&
-            workBoard[i * numColumns + j + numRows] !== '' &&
-            workBoard[i * numColumns + j + numRows * 2] !== '' &&
-            workBoard[i * numColumns + j] !== ' ' &&
-            workBoard[i * numColumns + j + numRows] !== ' ' &&
-            workBoard[i * numColumns + j + numRows * 2] !== ' '
-          ) {
-            word =
-              workBoard[i * numColumns + j] +
-              workBoard[i * numColumns + j + numRows] +
-              workBoard[i * numColumns + j + numRows * 2];
-            if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-              workMessage = 'Word not found - ' + word;
-              workBoard = workPreviousBoard;
-            } else {
-              if (wordList[word] === undefined) {
-                wordList[word] = 1;
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i * numColumns + j];
-                  }).point;
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i * numColumns + j + numRows];
-                  }).point;
-                workScore =
-                  workScore +
-                  letterPoints.find(item => {
-                    return item.letter === workBoard[i * numColumns + j + numRows * 2];
-                  }).point;
-                if (i * numColumns + j - numRows >= 0) {
-                  workBoard[i * numColumns + j - numRows] = '';
-                }
-                if (i * numColumns + j + numRows * 3 < 64) {
-                  workBoard[i * numColumns + j + numRows * 3] = '';
-                }
-              } else {
-                workMessage = 'Duplicate word - word rejected - ' + word;
-                workBoard = workPreviousBoard;
+    }
+    //  2) find words on columns
+    for (j = 0; j < numColumns; j++) {
+      for (i = 0; i < numRows - 2; i++) {
+        if (
+          workBoard[i * numColumns + j] !== '' &&
+          workBoard[i * numColumns + j + numRows] !== '' &&
+          workBoard[i * numColumns + j + numRows * 2] !== '' &&
+          workBoard[i * numColumns + j] !== ' ' &&
+          workBoard[i * numColumns + j + numRows] !== ' ' &&
+          workBoard[i * numColumns + j + numRows * 2] !== ' '
+        ) {
+          word =
+            workBoard[i * numColumns + j] +
+            workBoard[i * numColumns + j + numRows] +
+            workBoard[i * numColumns + j + numRows * 2];
+          if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
+            workMessage = 'Word not found - ' + word;
+            workBoard = workPreviousBoard;
+          } else {
+            if (wordList[word] === undefined) {
+              wordList[word] = 1;
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i * numColumns + j];
+                }).point;
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i * numColumns + j + numRows];
+                }).point;
+              workScore =
+                workScore +
+                letterPoints.find(item => {
+                  return item.letter === workBoard[i * numColumns + j + numRows * 2];
+                }).point;
+              if (i * numColumns + j - numRows >= 0) {
+                workBoard[i * numColumns + j - numRows] = '';
               }
+              if (i * numColumns + j + numRows * 3 < 64) {
+                workBoard[i * numColumns + j + numRows * 3] = '';
+              }
+            } else {
+              workMessage = 'Duplicate word - word rejected - ' + word;
+              workBoard = workPreviousBoard;
             }
           }
         }
       }
-      if (workMessage === '') {
-        workMessage = 'Enter next Letter';
-      }
-      // End of Game check
-      if (workBoard.indexOf(' ') === -1) {
-        workMessage = 'Game completed';
-      }
-      return {
-        message: workMessage,
-        score: workScore,
-        board: workBoard,
-        previousBoard: workPreviousBoard,
-      };
+    }
+    if (workMessage === '') {
+      workMessage = 'Enter next Letter';
+    }
+    // End of Game check
+    if (workBoard.indexOf(' ') === -1) {
+      workMessage = 'Game completed';
+    }
+    return {
+      message: workMessage,
+      score: workScore,
+      board: workBoard,
+      previousBoard: workPreviousBoard,
+    };
   };
 
   // Enter a Letter from keyboard
