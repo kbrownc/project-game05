@@ -16,6 +16,7 @@ import {
 
 const numColumns = 8;
 const numRows = 8;
+const level = 'Expert';
 
 let newBoard = new Array(numColumns * numRows).fill('');
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -54,10 +55,6 @@ export default function App() {
       let randomNumber = Math.floor(Math.random() * 25);
       let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
       let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
-      randomNumberIndex = Math.floor(Math.random() * 63);
-      randomNumber = Math.floor(Math.random() * 25);
-      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
       randomNumberIndex = Math.floor(Math.random() * 63);
       randomNumber = Math.floor(Math.random() * 25);
       randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -148,17 +145,49 @@ export default function App() {
     randomNumber = Math.floor(Math.random() * 25);
     randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
     enterLetter(randomNumberValue, randomNumberIndex);
-    randomNumberIndex = Math.floor(Math.random() * 63);
-    randomNumber = Math.floor(Math.random() * 25);
-    randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-    enterLetter(randomNumberValue, randomNumberIndex);
   }, []);
 
   // press Alert button
   const pressAlert = () => {
-    const alertMessage =
-      'Only 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
-    Alert.alert('How to Play', alertMessage, [{ text: 'understood' }]);
+    let alertMessage1;
+    let alertMessage2 = '';
+    const alertMessage0 = [
+      {
+        date: '2021-01-22',
+        score: 78,
+        level: 'Expert',
+      },
+      {
+        date: '1999-03-02',
+        score: 101,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 98,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 50,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 99,
+        level: 'Beginner',
+      },
+    ];
+    for ( let {date: d, score: s, level: l} of alertMessage0) {
+      alertMessage1 = (d + '---' + s + '---' + l) + " ";
+      alertMessage2 = alertMessage1 + alertMessage2;
+    }
+
+    const alertMessage3 =
+      '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
+
+    const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
+    Alert.alert('Your Highscores/How to Play', alertMessage, [{ text: 'understood' }]);
   };
 
   // enterLetterLogic function
@@ -341,8 +370,56 @@ export default function App() {
       workMessage = 'Enter next Letter';
     }
     // End of Game check
-    if (workBoard.indexOf(' ') === -1) {
+    if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
+      const highScores = [
+      {
+        date: '2021-01-22',
+        score: 78,
+        level: 'Expert',
+      },
+      {
+        date: '1999-03-02',
+        score: 101,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 98,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 1,
+        level: 'Beginner',
+      },
+      {
+        date: '1999-03-02',
+        score: 2,
+        level: 'Beginner',
+      },
+    ];
+      // const highScores = JSON.parse(async () => {await AsyncStorage.getItem('highscores') || []}());
+      
+      // if (highScores !== null) {
+      //   highScores2 = JSON.parse(highScores);
+      // } else {
+      //   highScores2 = [];
+      // };
+      let today = new Date();
+      let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      console.log('today', today);
+      console.log('date', date);
+      const recentScore = {
+        date: date,
+        score: workScore,
+        level: level,
+      };
+      highScores.push(recentScore);
+      highScores.sort((a, b) => b.score - a.score);
+      highScores.splice(5);
+      //console.log('highScores',highScores);
+      // save highScores into storage
     }
     return {
       message: workMessage,
