@@ -16,7 +16,6 @@ import {
 
 const numColumns = 8;
 const numRows = 8;
-const level = 'Expert';
 
 let newBoard = new Array(numColumns * numRows).fill('');
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -30,9 +29,11 @@ export default function App() {
   });
   const [time, setTime] = useState(300);
   const [timerOn, setTimerOn] = useState(true);
+  const [level, setLevel] = useState('x');
 
   // render board
   const renderBoard = ({ item, index }) => {
+  //  console.log('renderBoard');
     return (
       <View style={item === ' ' ? [globalStyles.item, globalStyles.itemRed] : globalStyles.item}>
         <TextInput
@@ -49,6 +50,7 @@ export default function App() {
 
   // press Reset button
   const pressReset = useCallback(() => {
+    console.log('Reset');
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(newBoard));
       let randomNumberIndex = Math.floor(Math.random() * 63);
@@ -74,7 +76,24 @@ export default function App() {
     });
   }, []);
 
+  // Update Level if button is pressed
+  const pressLevel = useCallback(async () => {
+    console.log('pressLevel');
+    if (level === 'Beginner') {
+        setLevel('Standard');
+    } else if (level === 'Standard') {
+        setLevel('Expert');
+    } else if  (level === 'Expert') {
+        setLevel('Beginner');
+    } else {
+        setLevel('Beginner');
+    };
+    console.log('**level(after)',level);
+    await AsyncStorage.setItem('level', level);
+  }, [level]);
+
   const pressSave = useCallback(async () => {
+    console.log('pressSave');
     await AsyncStorage.setItem('Board', JSON.stringify(board));
     setGameState(prevGameState => {
       let workMessage = 'Game saved';
@@ -86,7 +105,8 @@ export default function App() {
   }, [board]);
 
   // LOAD board if previously saved
-  const load = useCallback(async () => {
+  const loadBoard = useCallback(async () => {
+    console.log('loadBoard');
     let savedBoard = await AsyncStorage.getItem('Board');
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
@@ -104,7 +124,8 @@ export default function App() {
   }, []);
 
   // Remove previously saved board if it exists
-  const remove = async () => {
+  const removeBoard = async () => {
+    console.log('removeBoard');
     try {
       await AsyncStorage.removeItem('Board');
     } catch (err) {
@@ -114,12 +135,33 @@ export default function App() {
 
   // Load and Remove saved board after render, but onlu on app startup
   useEffect(() => {
-    load();
-    remove();
+    console.log('useEffect load and remove Board');
+    loadBoard();
+    removeBoard();
+  }, []);
+
+  // Load previously saved Level if it exists
+  const loadLevel = async () => {
+    console.log('loadLevel');
+    try {
+      let workLevel = await AsyncStorage.getItem('level');
+      console.log('**workLevel',workLevel);
+      setLevel(workLevel);
+      console.log('**level',level);
+    } catch (err) {
+      alert(err);
+    }
+  };
+
+  // Load Level on app startup and store in state
+  useEffect(() => {
+    console.log('useEffect loadLevel');
+    loadLevel();
   }, []);
 
   // Set and update timer whenever 'timerOn' or 'time' changes
   useEffect(() => {
+ //   console.log('useEffect timer');
     let interval = null;
     if (timerOn && time > 0) {
       interval = setInterval(() => {
@@ -133,6 +175,7 @@ export default function App() {
 
   // Load random letters in random spots when app loads
   useEffect(() => {
+    console.log('useEffect load random letters');
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -149,6 +192,7 @@ export default function App() {
 
   // press Alert button
   const pressAlert = () => {
+    console.log('pressAlert');
     let alertMessage1;
     let alertMessage2 = '';
     const alertMessage0 = [
@@ -182,10 +226,8 @@ export default function App() {
       alertMessage1 = (d + '---' + s + '---' + l) + " ";
       alertMessage2 = alertMessage1 + alertMessage2;
     }
-
     const alertMessage3 =
       '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
-
     const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
     Alert.alert('Your Highscores/How to Play', alertMessage, [{ text: 'understood' }]);
   };
@@ -201,6 +243,7 @@ export default function App() {
   const enterLetterLogic = (value, item, tempBoard) => {
     // let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
     // let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
+    console.log('enterLetterLogic');
     let workBoard = JSON.parse(JSON.stringify(tempBoard));
     let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
     let workMessage = '';
@@ -372,6 +415,12 @@ export default function App() {
     // End of Game check
     if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
+      // const highScores = JSON.parse(async () => {await AsyncStorage.getItem('highscores') || []}());
+      // if (highScores !== null) {
+      //   highScores2 = JSON.parse(highScores);
+      // } else {
+      //   highScores2 = [];
+      // };
       const highScores = [
       {
         date: '2021-01-22',
@@ -399,17 +448,8 @@ export default function App() {
         level: 'Beginner',
       },
     ];
-      // const highScores = JSON.parse(async () => {await AsyncStorage.getItem('highscores') || []}());
-      
-      // if (highScores !== null) {
-      //   highScores2 = JSON.parse(highScores);
-      // } else {
-      //   highScores2 = [];
-      // };
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-      console.log('today', today);
-      console.log('date', date);
       const recentScore = {
         date: date,
         score: workScore,
@@ -419,7 +459,7 @@ export default function App() {
       highScores.sort((a, b) => b.score - a.score);
       highScores.splice(5);
       //console.log('highScores',highScores);
-      // save highScores into storage
+      // await AsyncStorage.setItem('highScores', JSON.stringify(highScores));
     }
     return {
       message: workMessage,
@@ -433,6 +473,7 @@ export default function App() {
   // - calls enterLetterLogic which has detailed logic
   const enterLetter = useCallback((value, item) => {
     setGameState(prevGameState => {
+      console.log('enterLetter');
       const eLL = enterLetterLogic(value, item, prevGameState.board);
       return {
         ...prevGameState,
@@ -468,8 +509,14 @@ export default function App() {
           <Button onPress={pressSave} title="Save" color="green" />
           <Button onPress={pressAlert} title="About" color="green" />
         </View>
-        <View style={globalStyles.messageRow}>
-          <Text style={globalStyles.message}>{message}</Text>
+        <View style={globalStyles.nav}>
+          <View style={globalStyles.messageRow}>
+            <Text style={globalStyles.message}>{message}</Text>
+          </View>
+          <Button onPress={pressLevel} title="level" color="green" />
+          <View style={globalStyles.messageRow}>
+            <Text style={globalStyles.message}>{level}</Text>
+          </View>
         </View>
         <View style={globalStyles.board}>
           <FlatList

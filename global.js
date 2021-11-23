@@ -56,7 +56,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center',
   },
   messageRow: {
-    flex: .5,
+    flex: 1,
   },
   board: {
     flex: 7,
