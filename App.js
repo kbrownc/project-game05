@@ -20,6 +20,16 @@ const numRows = 8;
 let newBoard = new Array(numColumns * numRows).fill('');
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+AsyncStorage.getAllKeys((err, keys) => {
+  AsyncStorage.multiGet(keys, (error, stores) => {
+    stores.map((result, i, store) => {
+      console.log('AsyncStorage',{ [store[i][0]]: store[i][1] });
+      return true;
+    });
+  });
+});
+
+
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
     message: 'Enter 1st letter',
@@ -29,7 +39,7 @@ export default function App() {
   });
   const [time, setTime] = useState(300);
   const [timerOn, setTimerOn] = useState(true);
-  const [level, setLevel] = useState('Beginner');
+  const [level, setLevel] = useState('init');
 
   // render board
   const renderBoard = ({ item, index }) => {
@@ -78,17 +88,18 @@ export default function App() {
   // Update Level if button is pressed
   const pressLevel = useCallback(async () => {
     if (level === 'Beginner') {
-        setLevel('Standard');
+      setLevel('Standard');
     } else if (level === 'Standard') {
-        setLevel('Expert');
-    } else if  (level === 'Expert') {
-        setLevel('Beginner');
+      setLevel('Expert');
+    } else if (level === 'Expert') {
+      setLevel('Beginner');
     } else {
-        setLevel('Beginner');
-    };
+      setLevel('Beginner');
+    }
     await AsyncStorage.setItem('level', level);
   }, [level]);
 
+  // Save board in progress
   const pressSave = useCallback(async () => {
     await AsyncStorage.setItem('Board', JSON.stringify(board));
     setGameState(prevGameState => {
@@ -101,27 +112,23 @@ export default function App() {
   }, [board]);
 
   // set highscore
-  const setHighScores = async (highScores) => {
-    console.log('setHighScores');
-    console.log('--highScores',JSON.stringify(highScores));
+  const setHighScores = async highScores => {
+    console.log('setHighScores **highScores', JSON.stringify(highScores));
     AsyncStorage.setItem('highScoresList', JSON.stringify(highScores));
   };
 
   // get highscore
   // const getHighScores = async () => {
-  //   console.log('getHighScores');
   //   let highScores = await AsyncStorage.getItem('highScoresList');
-  //   console.log('*highScores',highScores);
   //   return highScores
   // };
 
   // get highscore
   const getHighScores = () => {
-    console.log('getHighScores');
-    return AsyncStorage.getItem('highScoresList').then((highScores) => {
-      console.log('*highScores',highScores);
+    return AsyncStorage.getItem('highScoresList').then(highScores => {
+      console.log('getHighScores ++highScores', highScores);
       return highScores;
-    })
+    });
   };
 
   // LOAD board if previously saved
@@ -129,14 +136,18 @@ export default function App() {
     let savedBoard = await AsyncStorage.getItem('Board');
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
+      let workScore = 0;
       let workMessage = prevGameState.message;
       if (savedBoard !== null) {
         workBoard = JSON.parse(savedBoard);
         workMessage = 'Previous game loaded';
+        let eLL = enterLetterLogic(' ', 0, workBoard);
+        workScore = eLL.score;
       }
       return {
         ...prevGameState,
         message: workMessage,
+        score: workScore,
         board: JSON.parse(JSON.stringify(workBoard)),
       };
     });
@@ -152,45 +163,40 @@ export default function App() {
   };
 
   // Remove previously saved highScoresList if it exists (for testing purposes only)
-  const removeHighScoresList = async () => {
-    console.log('removeHighScoresList');
+  const removeHighScores = async () => {
     try {
-      await AsyncStorage.removeItem('highScoresList');
+      await AsyncStorage.removeItem('highScoresList').then(() => console.log('removeHighScores has run'));
     } catch (err) {
       alert(err);
     }
   };
 
-  // Load and Remove saved board after render, but onlu on app startup
+  // Load and Remove saved board after render, but only at app startup
   useEffect(() => {
     loadBoard();
     removeBoard();
+  //  removeHighScores();
   }, []);
 
-  // Load previously saved highScores if it exists
-  const loadHighScoresList = async () => {
-    console.log('loadHighScoresList start');
-    try {
-//      removeHighScoresList();
-      let highScores = await AsyncStorage.getItem('highScoresList');
-      console.log('**highScores 1',highScores);
-      if (highScores === null) {
-        highScores = [{}];
-      }
-      console.log('**highScores 2',highScores);
-    } catch (err) {
-      alert(err);
-    };
-    console.log('loadHighScoresList end');
-    return highScores;
-  };
+  //   // Load previously saved highScores if it exists
+  //   const loadHighScoresList = async () => {
+  //     try {
+  //       let highScores = await AsyncStorage.getItem('highScoresList');
+  //       if (highScores === null) {
+  //         highScores = [];
+  //       }
+  //     } catch (err) {
+  //       alert(err);
+  //     };
+  //     return highScores;
+  //   };
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
     try {
       let workLevel = await AsyncStorage.getItem('level');
       if (workLevel === null) {
-        workLevel = 'z';
+        workLevel = 'load';
       }
       setLevel(workLevel);
     } catch (err) {
@@ -234,45 +240,17 @@ export default function App() {
 
   // press Alert button
   const pressAlert = () => {
-    console.log('pressAlert');
     let alertMessage1;
     let alertMessage2 = '';
-    //  let highScores2 = loadHighScoresList();
-    //console.log('**highScores2 Alert',JSON.stringify(highScores2));
+    let getHighScoresPromise = getHighScores();
+    getHighScoresPromise.then(high => {
+      let highScores = high;
+      console.log('Alert a',highScores);
+    });
+    console.log('Alert b',highScores);
 
-    // const highScores = [
-    //   {
-    //     date: '2021-01-22',
-    //     score: 78,
-    //     level: 'Expert',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 101,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 98,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 50,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 99,
-    //     level: 'Beginner',
-    //   },
-    // ];
-
-    let highScores = [{}];
-    console.log('**highScores Alert',highScores);
-
-    for ( let {date: d, score: s, level: l} of highScores) {
-      alertMessage1 = (d + '---' + s + '---' + l) + " ";
+    for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
+      alertMessage1 = d + '---' + s + '---' + l + ' ';
       alertMessage2 = alertMessage1 + alertMessage2;
     }
     const alertMessage3 =
@@ -300,8 +278,10 @@ export default function App() {
     let workScore = 0;
     let i;
     let j;
-    // add letter to board
-    workBoard[item] = value.trim();
+    // add letter to board (if value = ' ' then this is only to calculate score)
+    if (value !== ' ') {
+      workBoard[item] = value.trim();
+    }
     // mark squares on board that can be used (both sides of letter)
     //  - rows
     for (j = 0; j < numRows; j++) {
@@ -463,46 +443,21 @@ export default function App() {
     // End of Game check
     if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
-      console.log('end of game logic');
-
-      // const highScores2 = async () => {await AsyncStorage.getItem('highScoresList') || []};
-      //let highScores2 = JSON.parse(getHighScores());
-      //console.log('----highScores2',highScores2);
-      // const highScores2 = JSON.parse(async () => {await AsyncStorage.getItem('highScoresList') || []});
-      // if (highScores2 !== null) {
-      //   highScores3 = JSON.parse(highScores);
-      // } else {
-      //   highScores3 = [{}];
-      // };
-
+      // Get previous highScores from storage
       let highScores = [];
-    //   const highScores = [
-    //   {
-    //     date: '2021-01-22',
-    //     score: 78,
-    //     level: 'Expert',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 101,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 98,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 1,
-    //     level: 'Beginner',
-    //   },
-    //   {
-    //     date: '1999-03-02',
-    //     score: 2,
-    //     level: 'Beginner',
-    //   },
-    // ];
+      let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+
+      let getHighScoresPromise = getHighScores();
+      getHighScoresPromise.then((highScoresOld) => {
+        if (highScoresOld === null) {
+          let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+        } else {
+          let highScoresOld = highScoresOld;
+        }
+        return highScoresOld;
+      });
+      highScores.push(JSON.parse(highScoresOld));
+      // Create score for current round and add to previous highScores
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
       const recentScore = {
@@ -511,15 +466,18 @@ export default function App() {
         level: level,
       };
       highScores.push(recentScore);
+      // Sort highScores and take top 5 scores
       highScores.sort((a, b) => b.score - a.score);
       highScores.splice(5);
-      console.log('**highScores',highScores);
-      setHighScores(highScores);
-
-      let highScores2Promise = getHighScores();
-      highScores2Promise.then((highScores2) => {
-        console.log('++highScores2',highScores2);        
-      });
+      console.log('EOG **highScores after recent added', highScores);
+      // Store new list of highScores
+      let setHighScoresPromise = setHighScores(highScores);
+      setHighScoresPromise
+        .then(highScores => {
+          return;
+        })
+        .catch(err => console.log('err', err));
+      console.log('EOG END');
     }
     return {
       message: workMessage,
