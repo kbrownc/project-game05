@@ -23,12 +23,11 @@ const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 AsyncStorage.getAllKeys((err, keys) => {
   AsyncStorage.multiGet(keys, (error, stores) => {
     stores.map((result, i, store) => {
-      console.log('AsyncStorage',{ [store[i][0]]: store[i][1] });
+      console.log('AsyncStorage', { [store[i][0]]: store[i][1] });
       return true;
     });
   });
 });
-
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
@@ -86,17 +85,28 @@ export default function App() {
   }, []);
 
   // Update Level if button is pressed
-  const pressLevel = useCallback(async () => {
+  const pressLevel = useCallback(() => {
+    console.log('pressLevel a',level);
+    let workLevel = 'xxxx';
     if (level === 'Beginner') {
+      console.log('pressLevel c1',level);
       setLevel('Standard');
+      workLevel = 'Standard';
     } else if (level === 'Standard') {
+      console.log('pressLevel c2',level);
       setLevel('Expert');
+      workLevel = 'Expert';
     } else if (level === 'Expert') {
+      console.log('pressLevel c3',level);
       setLevel('Beginner');
+      workLevel = 'Beginner';
     } else {
-      setLevel('Beginner');
-    }
-    await AsyncStorage.setItem('level', level);
+      console.log('pressLevel c4',level);
+      setLevel('Default');
+      workLevel = 'Beginner';
+    };
+    console.log('pressLevel z',workLevel);
+    setLevelStorage(workLevel);
   }, [level]);
 
   // Save board in progress
@@ -111,24 +121,24 @@ export default function App() {
     });
   }, [board]);
 
-  // set highscore
-  const setHighScores = async highScores => {
-    console.log('setHighScores **highScores', JSON.stringify(highScores));
-    AsyncStorage.setItem('highScoresList', JSON.stringify(highScores));
+  // set level in local storage
+  const setLevelStorage = async level => {
+    console.log('setLevelStorage ++level', level);
+    AsyncStorage.setItem('level', level);
+    return level;
   };
 
-  // get highscore
-  // const getHighScores = async () => {
-  //   let highScores = await AsyncStorage.getItem('highScoresList');
-  //   return highScores
-  // };
+  // set highscore
+  const setHighScores = async highScores => {
+    console.log('setHighScores ++highScores', JSON.stringify(highScores));
+    AsyncStorage.setItem('highScoresList', JSON.stringify(highScores));
+    return highScores;
+  };
 
-  // get highscore
-  const getHighScores = () => {
-    return AsyncStorage.getItem('highScoresList').then(highScores => {
-      console.log('getHighScores ++highScores', highScores);
-      return highScores;
-    });
+  // get highscore - 2
+  const getHighScores = async () => {
+    let highScores = await AsyncStorage.getItem('highScoresList');
+    return highScores
   };
 
   // LOAD board if previously saved
@@ -175,39 +185,21 @@ export default function App() {
   useEffect(() => {
     loadBoard();
     removeBoard();
-  //  removeHighScores();
+    //  removeHighScores();
   }, []);
-
-  //   // Load previously saved highScores if it exists
-  //   const loadHighScoresList = async () => {
-  //     try {
-  //       let highScores = await AsyncStorage.getItem('highScoresList');
-  //       if (highScores === null) {
-  //         highScores = [];
-  //       }
-  //     } catch (err) {
-  //       alert(err);
-  //     };
-  //     return highScores;
-  //   };
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
-    try {
-      let workLevel = await AsyncStorage.getItem('level');
-      if (workLevel === null) {
-        workLevel = 'load';
-      }
-      setLevel(workLevel);
-    } catch (err) {
-      alert(err);
-    }
+    let workLevel = await AsyncStorage.getItem('level');   
+   return workLevel;
   };
 
   // Load Level on app startup and store in state
   useEffect(() => {
-    loadLevel();
-  }, []);
+    loadLevel().then((level) => {
+      setLevel(level);
+    });
+  }, [level]);
 
   // Set and update timer whenever 'timerOn' or 'time' changes
   useEffect(() => {
@@ -242,21 +234,17 @@ export default function App() {
   const pressAlert = () => {
     let alertMessage1;
     let alertMessage2 = '';
-    let getHighScoresPromise = getHighScores();
-    getHighScoresPromise.then(high => {
-      let highScores = high;
-      console.log('Alert a',highScores);
+    return getHighScores().then((highScores) => {
+      console.log('highScores', highScores);
+      for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
+        alertMessage1 = d + '---' + s + '---' + l + ' ';
+        alertMessage2 = alertMessage1 + alertMessage2;
+      }
+      const alertMessage3 =
+        '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
+      const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
+      Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
     });
-    console.log('Alert b',highScores);
-
-    for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
-      alertMessage1 = d + '---' + s + '---' + l + ' ';
-      alertMessage2 = alertMessage1 + alertMessage2;
-    }
-    const alertMessage3 =
-      '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
-    const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
-    Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
   };
 
   // enterLetterLogic function
@@ -444,19 +432,26 @@ export default function App() {
     if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
       // Get previous highScores from storage
-      let highScores = [];
-      let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+      // let highScores = [];
+      // let highScores2 = '{}';
+      let highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+      let highScoresNew = [];
 
-      let getHighScoresPromise = getHighScores();
-      getHighScoresPromise.then((highScoresOld) => {
-        if (highScoresOld === null) {
-          let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
-        } else {
-          let highScoresOld = highScoresOld;
-        }
-        return highScoresOld;
-      });
-      highScores.push(JSON.parse(highScoresOld));
+      getHighScores().then((highScores) => highScores);
+      //highScoresOld.then(() => highScores).catch((err) => console.log(err));
+      //console.log('highScores2=_=Old',highScores2,highScores,highScoresOld);
+
+      // let getHighScoresPromise = getHighScores();
+      // getHighScoresPromise.then((highScoresOld) => {
+      //   if (highScoresOld === null) {
+      //     let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+      //   } else {
+      //     let highScoresOld = highScoresOld;
+      //   }
+      //   return highScoresOld;
+      // });
+      let highScoresOld = JSON.parse(highScores);
+      highScoresNew.push(highScoresOld);
       // Create score for current round and add to previous highScores
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -465,13 +460,13 @@ export default function App() {
         score: workScore,
         level: level,
       };
-      highScores.push(recentScore);
+      highScoresNew.push(recentScore);
       // Sort highScores and take top 5 scores
-      highScores.sort((a, b) => b.score - a.score);
-      highScores.splice(5);
-      console.log('EOG **highScores after recent added', highScores);
+      highScoresNew.sort((a, b) => b.score - a.score);
+      highScoresNew.splice(5);
+      console.log('EOG **highScores after recent added', highScoresNew);
       // Store new list of highScores
-      let setHighScoresPromise = setHighScores(highScores);
+      let setHighScoresPromise = setHighScores(highScoresNew);
       setHighScoresPromise
         .then(highScores => {
           return;
