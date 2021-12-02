@@ -256,8 +256,6 @@ export default function App() {
   //    previousBoard - an array listing what the board looked like after the previous turn
   //    wordList - list of the 3-letter words on the board
   const enterLetterLogic = (value, item, tempBoard) => {
-    // let workBoard = JSON.parse(JSON.stringify(prevGameState.board));
-    // let workPreviousBoard = JSON.parse(JSON.stringify(prevGameState.board));
     let workBoard = JSON.parse(JSON.stringify(tempBoard));
     let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
     let workMessage = '';
@@ -432,26 +430,11 @@ export default function App() {
     if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
       // Get previous highScores from storage
-      // let highScores = [];
-      // let highScores2 = '{}';
-      let highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
-      let highScoresNew = [];
-
-      getHighScores().then((highScores) => highScores);
-      //highScoresOld.then(() => highScores).catch((err) => console.log(err));
-      //console.log('highScores2=_=Old',highScores2,highScores,highScoresOld);
-
-      // let getHighScoresPromise = getHighScores();
-      // getHighScoresPromise.then((highScoresOld) => {
-      //   if (highScoresOld === null) {
-      //     let highScoresOld = '{"date":"2000-01-01","score":99,"level":"Expert"}';
-      //   } else {
-      //     let highScoresOld = highScoresOld;
-      //   }
-      //   return highScoresOld;
-      // });
+      if (highScores === null) {
+        highScores = '[]';
+      };
+      // let highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
       let highScoresOld = JSON.parse(highScores);
-      highScoresNew.push(highScoresOld);
       // Create score for current round and add to previous highScores
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -460,26 +443,26 @@ export default function App() {
         score: workScore,
         level: level,
       };
-      highScoresNew.push(recentScore);
+      highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
-      highScoresNew.sort((a, b) => b.score - a.score);
-      highScoresNew.splice(5);
-      console.log('EOG **highScores after recent added', highScoresNew);
+      highScoresOld.sort((a, b) => b.score - a.score);
+      highScoresOld.splice(5);
+      console.log('EOG **highScores after recent added', highScoresOld);
       // Store new list of highScores
-      let setHighScoresPromise = setHighScores(highScoresNew);
+      let setHighScoresPromise = setHighScores(highScoresOld);
       setHighScoresPromise
-        .then(highScores => {
+        .then(highScores => { 
           return;
-        })
+         })
         .catch(err => console.log('err', err));
       console.log('EOG END');
-    }
-    return {
-      message: workMessage,
-      score: workScore,
-      board: workBoard,
-      previousBoard: workPreviousBoard,
-    };
+    };    
+      return {
+        message: workMessage,
+        score: workScore,
+        board: workBoard,
+        previousBoard: workPreviousBoard,
+      };
   };
 
   // Enter a Letter from keyboard
