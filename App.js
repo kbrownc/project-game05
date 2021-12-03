@@ -38,7 +38,7 @@ export default function App() {
   });
   const [time, setTime] = useState(300);
   const [timerOn, setTimerOn] = useState(true);
-  const [level, setLevel] = useState('init');
+  const [level, setLevel] = useState('Beginner');
 
   // render board
   const renderBoard = ({ item, index }) => {
@@ -89,19 +89,15 @@ export default function App() {
     console.log('pressLevel a',level);
     let workLevel = 'xxxx';
     if (level === 'Beginner') {
-      console.log('pressLevel c1',level);
       setLevel('Standard');
       workLevel = 'Standard';
     } else if (level === 'Standard') {
-      console.log('pressLevel c2',level);
       setLevel('Expert');
       workLevel = 'Expert';
     } else if (level === 'Expert') {
-      console.log('pressLevel c3',level);
       setLevel('Beginner');
       workLevel = 'Beginner';
     } else {
-      console.log('pressLevel c4',level);
       setLevel('Default');
       workLevel = 'Beginner';
     };
@@ -197,6 +193,7 @@ export default function App() {
   // Load Level on app startup and store in state
   useEffect(() => {
     loadLevel().then((level) => {
+      console.log('useEffect',level);
       setLevel(level);
     });
   }, [level]);
@@ -235,10 +232,10 @@ export default function App() {
     let alertMessage1;
     let alertMessage2 = '';
     return getHighScores().then((highScores) => {
-      console.log('highScores', highScores);
+      console.log('Alert highScores', highScores);
       for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
-        alertMessage1 = d + '---' + s + '---' + l + ' ';
-        alertMessage2 = alertMessage1 + alertMessage2;
+        alertMessage1 = d + '---' + s + '---' + l + ' ' + '  ';
+        alertMessage2 = alertMessage2 + alertMessage1;
       }
       const alertMessage3 =
         '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
@@ -437,6 +434,7 @@ export default function App() {
         score: workScore,
         level: level,
       };
+      console.log('EOG END level',recentScore);
       updateHighScores(recentScore);
       console.log('EOG END');
     };    
@@ -453,15 +451,17 @@ export default function App() {
     // Get previous highScores from storage
     getHighScores().then((highScores) => {
       if (highScores === null) {
-        highScores = '[]';
-        // highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+        // highScores = '[]';
+        highScores = '[{"date":"2000-01-01","score":99,"level":"Expert"}]';
       };
       let highScoresOld = JSON.parse(highScores);
+      console.log('updateHighScores recentScore',recentScore);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
       highScoresOld.sort((a, b) => b.score - a.score);
+      console.log('EOG **highScores before top 5 selected', highScoresOld);
       highScoresOld.splice(5);
-      console.log('EOG **highScores after recent added', highScoresOld);
+      console.log('EOG **highScores after top 5 selected', highScoresOld);
       // Store new list of highScores
       let setHighScoresPromise = setHighScores(highScoresOld);
       setHighScoresPromise
