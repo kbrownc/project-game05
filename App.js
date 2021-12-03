@@ -429,13 +429,7 @@ export default function App() {
     // End of Game check
     if (workBoard.indexOf(' ') === -1 || workScore > 5) {
       workMessage = 'Game completed';
-      // Get previous highScores from storage
-      if (highScores === null) {
-        highScores = '[]';
-      };
-      // let highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
-      let highScoresOld = JSON.parse(highScores);
-      // Create score for current round and add to previous highScores
+      // Create score for current round
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
       const recentScore = {
@@ -443,6 +437,26 @@ export default function App() {
         score: workScore,
         level: level,
       };
+      updateHighScores(recentScore);
+      console.log('EOG END');
+    };    
+      return {
+        message: workMessage,
+        score: workScore,
+        board: workBoard,
+        previousBoard: workPreviousBoard,
+      };
+  };
+
+  // updateHighScores function
+  const updateHighScores = (recentScore) => {
+    // Get previous highScores from storage
+    getHighScores().then((highScores) => {
+      if (highScores === null) {
+        highScores = '[]';
+        // highScores = '{"date":"2000-01-01","score":99,"level":"Expert"}';
+      };
+      let highScoresOld = JSON.parse(highScores);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
       highScoresOld.sort((a, b) => b.score - a.score);
@@ -454,16 +468,10 @@ export default function App() {
         .then(highScores => { 
           return;
          })
-        .catch(err => console.log('err', err));
-      console.log('EOG END');
-    };    
-      return {
-        message: workMessage,
-        score: workScore,
-        board: workBoard,
-        previousBoard: workPreviousBoard,
-      };
+        .catch(err => console.log('err', err));  
+    })
   };
+
 
   // Enter a Letter from keyboard
   // - calls enterLetterLogic which has detailed logic
