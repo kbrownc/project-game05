@@ -20,10 +20,12 @@ const numRows = 8;
 let newBoard = new Array(numColumns * numRows).fill('');
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+// Dump out AsyncStorage
 AsyncStorage.getAllKeys((err, keys) => {
   AsyncStorage.multiGet(keys, (error, stores) => {
     stores.map((result, i, store) => {
       console.log('AsyncStorage', { [store[i][0]]: store[i][1] });
+      console.log('-----------------------------------------------');
       return true;
     });
   });
@@ -38,7 +40,8 @@ export default function App() {
   });
   const [time, setTime] = useState(300);
   const [timerOn, setTimerOn] = useState(true);
-  const [level, setLevel] = useState('Beginner');
+  const [level, setLevel] = useState('**init**');
+  const [previousScore, setPreviousScore] = useState(0);
 
   // render board
   const renderBoard = ({ item, index }) => {
@@ -86,23 +89,28 @@ export default function App() {
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
-    console.log('pressLevel a',level);
-    let workLevel = 'xxxx';
-    if (level === 'Beginner') {
-      setLevel('Standard');
-      workLevel = 'Standard';
-    } else if (level === 'Standard') {
-      setLevel('Expert');
-      workLevel = 'Expert';
-    } else if (level === 'Expert') {
-      setLevel('Beginner');
-      workLevel = 'Beginner';
-    } else {
-      setLevel('Default');
-      workLevel = 'Beginner';
-    };
-    console.log('pressLevel z',workLevel);
-    setLevelStorage(workLevel);
+    console.log('score',score);
+    if (score === 0) {
+      let workLevel = 'xxxx';
+      if (level === 'Beginner') {
+        setLevel('Standard');
+        setTime(180);
+        workLevel = 'Standard';
+      } else if (level === 'Standard') {
+        setLevel('Expert');
+        setTime(180);
+        workLevel = 'Expert';
+      } else if (level === 'Expert') {
+        setLevel('Beginner');
+        setTime(1200);
+        workLevel = 'Beginner';
+      } else {
+        setLevel('Default');
+        setTime(1200);
+       workLevel = 'Beginner';
+      };
+      setLevelStorage(workLevel);
+    }
   }, [level]);
 
   // Save board in progress
@@ -119,14 +127,12 @@ export default function App() {
 
   // set level in local storage
   const setLevelStorage = async level => {
-    console.log('setLevelStorage ++level', level);
     AsyncStorage.setItem('level', level);
     return level;
   };
 
   // set highscore
   const setHighScores = async highScores => {
-    console.log('setHighScores ++highScores', JSON.stringify(highScores));
     AsyncStorage.setItem('highScoresList', JSON.stringify(highScores));
     return highScores;
   };
@@ -178,11 +184,11 @@ export default function App() {
   };
 
   // Load and Remove saved board after render, but only at app startup
-  useEffect(() => {
-    loadBoard();
-    removeBoard();
-    //  removeHighScores();
-  }, []);
+  // useEffect(() => {
+  //   loadBoard();
+  //   removeBoard();
+  //   //  removeHighScores();
+  // }, []);
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
@@ -192,11 +198,12 @@ export default function App() {
 
   // Load Level on app startup and store in state
   useEffect(() => {
-    loadLevel().then((level) => {
-      console.log('useEffect',level);
-      setLevel(level);
+    loadLevel().then( workLevel => {   
+      console.log('loadlevel.then',workLevel);     
+      setLevel(workLevel);
+      console.log('useEffect workLevel/level',workLevel, level);
     });
-  }, [level]);
+  }, []);
 
   // Set and update timer whenever 'timerOn' or 'time' changes
   useEffect(() => {
@@ -213,6 +220,8 @@ export default function App() {
 
   // Load random letters in random spots when app loads
   useEffect(() => {
+    loadBoard();
+    removeBoard();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -232,7 +241,6 @@ export default function App() {
     let alertMessage1;
     let alertMessage2 = '';
     return getHighScores().then((highScores) => {
-      console.log('Alert highScores', highScores);
       for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
         alertMessage1 = d + '---' + s + '---' + l + ' ' + '  ';
         alertMessage2 = alertMessage2 + alertMessage1;
@@ -420,6 +428,9 @@ export default function App() {
         }
       }
     }
+    // Determine if extra time should be awarded based on points accumulated
+    workMessage = rewardExtraTime();
+    // If no other messages have been generated, issue this generic one
     if (workMessage === '') {
       workMessage = 'Enter next Letter';
     }
@@ -429,14 +440,13 @@ export default function App() {
       // Create score for current round
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      console.log('EOG END ++level',level);
       const recentScore = {
         date: date.toString(),
         score: workScore,
         level: level,
       };
-      console.log('EOG END level',recentScore);
       updateHighScores(recentScore);
-      console.log('EOG END');
     };    
       return {
         message: workMessage,
@@ -452,16 +462,13 @@ export default function App() {
     getHighScores().then((highScores) => {
       if (highScores === null) {
         // highScores = '[]';
-        highScores = '[{"date":"2000-01-01","score":99,"level":"Expert"}]';
+        highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
       };
       let highScoresOld = JSON.parse(highScores);
-      console.log('updateHighScores recentScore',recentScore);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
       highScoresOld.sort((a, b) => b.score - a.score);
-      console.log('EOG **highScores before top 5 selected', highScoresOld);
       highScoresOld.splice(5);
-      console.log('EOG **highScores after top 5 selected', highScoresOld);
       // Store new list of highScores
       let setHighScoresPromise = setHighScores(highScoresOld);
       setHighScoresPromise
@@ -470,6 +477,42 @@ export default function App() {
          })
         .catch(err => console.log('err', err));  
     })
+  };
+
+  // reward extra time based on score
+  const rewardExtraTime = () => {
+    let workMessage = '';
+     if (level === 'Standard') {
+        if (score > 24 && previousScore < 25) {
+          workMessage = 'You are awarded 40 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 40);
+        } else if (score > 49 && previousScore < 50) {
+          workMessage = 'You are awarded 40 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 40);
+        } else if (score > 74 && previousScore < 75) {
+          workMessage = 'You are awarded 40 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 40);
+        }
+      }; 
+      if (level === 'Expert') {
+        if (score > 24 && previousScore < 25) {
+          workMessage = 'You are awarded 20 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 20);
+        } else if (score > 49 && previousScore < 50) {
+          workMessage = 'You are awarded 20 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 20);
+        } else if (score > 74 && previousScore < 75) {
+          workMessage = 'You are awarded 20 extra seconds';
+          setPreviousScore(score);
+          setTime(time + 20);
+        }
+      }; 
+      return workMessage;
   };
 
 
