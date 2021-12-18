@@ -77,7 +77,16 @@ export default function App() {
       randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
       eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
       setTimerOn(true);
-      setTime(300);
+      console.log('reset level',level);
+      if (level === 'Beginner'){
+        setTime(1200);
+      } else if (level === 'Standard') {
+        setTime(180);
+      } else if (level === 'Expert') {
+        setTime(180);
+      } else {
+        setTime(1200);
+      };
       return {
         message: 'Enter 1st letter',
         score: 0,
@@ -192,16 +201,16 @@ export default function App() {
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
-    let workLevel = await AsyncStorage.getItem('level');   
-   return workLevel;
+    let workLeve2 = await AsyncStorage.getItem('level');   
+   return workLeve2;
   };
 
   // Load Level on app startup and store in state
   useEffect(() => {
-    loadLevel().then( workLevel => {   
-      console.log('loadlevel.then',workLevel);     
-      setLevel(workLevel);
-      console.log('useEffect workLevel/level',workLevel, level);
+    loadLevel().then( workLeve2 => {   
+      console.log('loadlevel.then',workLeve2);     
+      setLevel(workLeve2);
+      console.log('useEffect workLevel/level',workLeve2, level);
     });
   }, []);
 
@@ -486,30 +495,30 @@ export default function App() {
         if (score > 24 && previousScore < 25) {
           workMessage = 'You are awarded 40 extra seconds';
           setPreviousScore(score);
-          setTime(time + 40);
+          setTime( prevTime => prevTime + 40);
         } else if (score > 49 && previousScore < 50) {
           workMessage = 'You are awarded 40 extra seconds';
           setPreviousScore(score);
-          setTime(time + 40);
+          setTime(prevTime => prevTime + 40);
         } else if (score > 74 && previousScore < 75) {
           workMessage = 'You are awarded 40 extra seconds';
           setPreviousScore(score);
-          setTime(time + 40);
+          setTime(prevTime => prevTime + 40);
         }
       }; 
       if (level === 'Expert') {
         if (score > 24 && previousScore < 25) {
           workMessage = 'You are awarded 20 extra seconds';
           setPreviousScore(score);
-          setTime(time + 20);
+          setTime(prevTime => prevTime + 20);
         } else if (score > 49 && previousScore < 50) {
           workMessage = 'You are awarded 20 extra seconds';
           setPreviousScore(score);
-          setTime(time + 20);
+          setTime(prevTime => prevTime + 20);
         } else if (score > 74 && previousScore < 75) {
           workMessage = 'You are awarded 20 extra seconds';
           setPreviousScore(score);
-          setTime(time + 20);
+          setTime(prevTime => prevTime + 20);
         }
       }; 
       return workMessage;
