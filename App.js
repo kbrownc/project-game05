@@ -116,7 +116,7 @@ export default function App() {
       } else {
         setLevel('Default');
         setTime(1200);
-       workLevel = 'Beginner';
+        workLevel = 'Beginner';
       };
       setLevelStorage(workLevel);
     }
@@ -183,7 +183,7 @@ export default function App() {
     }
   };
 
-  // Remove previously saved highScoresList if it exists (for testing purposes only)
+  // Remove previously saved highScoresList if it exists (for testing purposes only) ************
   const removeHighScores = async () => {
     try {
       await AsyncStorage.removeItem('highScoresList').then(() => console.log('removeHighScores has run'));
@@ -191,13 +191,6 @@ export default function App() {
       alert(err);
     }
   };
-
-  // Load and Remove saved board after render, but only at app startup
-  // useEffect(() => {
-  //   loadBoard();
-  //   removeBoard();
-  //   //  removeHighScores();
-  // }, []);
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
@@ -231,6 +224,7 @@ export default function App() {
   useEffect(() => {
     loadBoard();
     removeBoard();
+ //   removeHighScores();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
