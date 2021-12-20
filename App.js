@@ -122,9 +122,10 @@ export default function App() {
     }
   }, [level]);
 
-  // Save board in progress
+  // Save board/time in progress
   const pressSave = useCallback(async () => {
     await AsyncStorage.setItem('Board', JSON.stringify(board));
+    await AsyncStorage.setItem('timeLeft', JSON.stringify(time));
     setGameState(prevGameState => {
       let workMessage = 'Game saved';
       return {
@@ -132,7 +133,7 @@ export default function App() {
         message: workMessage,
       };
     });
-  }, [board]);
+  }, [board,time]);
 
   // set level in local storage
   const setLevelStorage = async level => {
@@ -146,7 +147,7 @@ export default function App() {
     return highScores;
   };
 
-  // get highscore - 2
+  // get highscore
   const getHighScores = async () => {
     let highScores = await AsyncStorage.getItem('highScoresList');
     return highScores
@@ -174,10 +175,31 @@ export default function App() {
     });
   }, []);
 
+  // LOAD Time if previously saved
+  const loadTime = useCallback(async () => {
+    let savedTime = await AsyncStorage.getItem('timeLeft');
+    setTime(prevTime => {
+      let workTime = JSON.parse(JSON.stringify(time));
+      if (savedTime !== null) {
+        workTime = JSON.parse(savedTime);
+      }
+      return workTime
+    });
+  }, []);
+
   // Remove previously saved board if it exists
   const removeBoard = async () => {
     try {
       await AsyncStorage.removeItem('Board');
+    } catch (err) {
+      alert(err);
+    }
+  };
+
+  // Remove previously saved time if it exists
+  const removeTime = async () => {
+    try {
+      await AsyncStorage.removeItem('timeLeft');
     } catch (err) {
       alert(err);
     }
@@ -224,6 +246,8 @@ export default function App() {
   useEffect(() => {
     loadBoard();
     removeBoard();
+    loadTime();
+    removeTime();
  //   removeHighScores();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
@@ -249,7 +273,8 @@ export default function App() {
         alertMessage2 = alertMessage2 + alertMessage1;
       }
       const alertMessage3 =
-        '\n\nOnly 3-letter words defined to the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.';
+        '\n\nOnly 3-letter words defined in the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.'
+        + 'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game.';
       const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
       Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
     });
@@ -546,7 +571,7 @@ export default function App() {
           <Button onPress={pressReset} title="Reset" color="green" />
           <View style={globalStyles.itemNav}>
             <Text style={globalStyles.itemText1}>
-              {'0' + Math.floor(time / 60) + ':' + ('0' + Math.floor(time % 60)).slice(-2)}
+              {Math.floor(time / 60) + ':' + ('0' + Math.floor(time % 60)).slice(-2)}
             </Text>
           </View>
           <View style={globalStyles.itemNav}>
