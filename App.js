@@ -97,7 +97,6 @@ export default function App() {
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
-    console.log('score',score);
     if (score === 0) {
       let workLevel = 'xxxx';
       if (level === 'Beginner') {
@@ -512,7 +511,6 @@ export default function App() {
       if (highScores === null) {
         highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
       };
-      console.log('updateHighScores highScores',highScores);
       let highScoresOld = JSON.parse(highScores);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
