@@ -77,7 +77,6 @@ export default function App() {
       randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
       eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
       setTimerOn(true);
-      console.log('reset level',level);
       if (level === 'Beginner'){
         setTime(1200);
       } else if (level === 'Standard') {
@@ -196,6 +195,15 @@ export default function App() {
     }
   };
 
+  // Remove level (Testing purposes only)
+  const removeLevel = async () => {
+    try {
+      await AsyncStorage.removeItem('level');
+    } catch (err) {
+      alert(err);
+    }
+  };
+
   // Remove previously saved time if it exists
   const removeTime = async () => {
     try {
@@ -222,10 +230,20 @@ export default function App() {
 
   // Load Level on app startup and store in state
   useEffect(() => {
-    loadLevel().then( workLeve2 => {   
-      console.log('loadlevel.then',workLeve2);     
+    loadLevel().then( workLeve2 => { 
+      if (workLeve2 === null) {
+        workLeve2 = "Beginner";
+      };      
       setLevel(workLeve2);
-      console.log('useEffect workLevel/level',workLeve2, level);
+      if (workLeve2 === 'Beginner') {
+        setTime(1200);
+      } else if (workLeve2 === 'Standard') {
+        setTime(180);
+      } else if (workLeve2 === 'Expert') {
+        setTime(180);
+      } else {
+        setTime(1200);
+      };
     });
   }, []);
 
@@ -249,6 +267,7 @@ export default function App() {
     loadTime();
     removeTime();
  //   removeHighScores();
+ //   removeLevel();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -268,6 +287,9 @@ export default function App() {
     let alertMessage1;
     let alertMessage2 = '';
     return getHighScores().then((highScores) => {
+      if (highScores === null) {
+        highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
+      };
       for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
         alertMessage1 = d + '---' + s + '---' + l + ' ' + '  ';
         alertMessage2 = alertMessage2 + alertMessage1;
@@ -468,7 +490,6 @@ export default function App() {
       // Create score for current round
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-      console.log('EOG END ++level',level);
       const recentScore = {
         date: date.toString(),
         score: workScore,
@@ -489,9 +510,9 @@ export default function App() {
     // Get previous highScores from storage
     getHighScores().then((highScores) => {
       if (highScores === null) {
-        // highScores = '[]';
         highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
       };
+      console.log('updateHighScores highScores',highScores);
       let highScoresOld = JSON.parse(highScores);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores

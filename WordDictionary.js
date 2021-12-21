@@ -752,6 +752,7 @@ let wordDictionary = [
   "qat",
   "qis",
   "qua",
+  "que",
   "rad",
   "rag",
   "rah",
