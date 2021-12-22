@@ -227,37 +227,37 @@ export default function App() {
    return workLeve2;
   };
 
-  // Load Level on app startup and store in state
+  // Load Level on app startup and store level in state
+  // Set and update timer
   useEffect(() => {
     loadLevel().then( workLeve2 => { 
       if (workLeve2 === null) {
         workLeve2 = "Beginner";
-      };      
+      }; 
+      let workTime = 0;     
       setLevel(workLeve2);
       if (workLeve2 === 'Beginner') {
-        setTime(1200);
+        workTime = 1200;
       } else if (workLeve2 === 'Standard') {
-        setTime(180);
+        workTime = 180;
       } else if (workLeve2 === 'Expert') {
-        setTime(180);
+        workTime = 180;
       } else {
-        setTime(1200);
+        workTime = 1200;
       };
+      setTime(workTime);
+      let interval = null;
+      console.log('useEffect Time',time, workTime);
+     if (timerOn && time > 0) {
+       interval = setInterval(() => {
+         setTime(prevTime => prevTime - 1);
+       }, 1000);
+     } else {
+       clearInterval(interval);
+     }
+     return () => clearInterval(interval);
     });
   }, []);
-
-  // Set and update timer whenever 'timerOn' or 'time' changes
-  useEffect(() => {
-    let interval = null;
-    if (timerOn && time > 0) {
-      interval = setInterval(() => {
-        setTime(prevTime => prevTime - 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [timerOn, time]);
 
   // Load random letters in random spots when app loads
   useEffect(() => {
