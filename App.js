@@ -39,8 +39,7 @@ export default function App() {
     previousBoard: [],
   });
   const [time, setTime] = useState(300);
-  const [timerOn, setTimerOn] = useState(true);
-  const [level, setLevel] = useState('**init**');
+  const [level, setLevel] = useState('*init*');
   const [previousScore, setPreviousScore] = useState(0);
 
   // render board
@@ -62,43 +61,52 @@ export default function App() {
   // press Reset button
   const pressReset = useCallback(() => {
     console.log('Reset');
-    setGameState(prevGameState => {
-      let workBoard = JSON.parse(JSON.stringify(newBoard));
-      let randomNumberIndex = Math.floor(Math.random() * 63);
-      let randomNumber = Math.floor(Math.random() * 25);
-      let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
-      randomNumberIndex = Math.floor(Math.random() * 63);
-      randomNumber = Math.floor(Math.random() * 25);
-      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
-      randomNumberIndex = Math.floor(Math.random() * 63);
-      randomNumber = Math.floor(Math.random() * 25);
-      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
-      setTimerOn(true);
-      if (level === 'Beginner'){
-        setTime(1200);
-      } else if (level === 'Standard') {
-        setTime(180);
-      } else if (level === 'Expert') {
-        setTime(180);
-      } else {
-        setTime(1200);
-      };
-      return {
-        message: 'Enter 1st letter',
-        score: 0,
-        board: JSON.parse(JSON.stringify(eLL.board)),
-        previousBoard: [],
-      };
-    });
+    let loadLevelPromise = loadLevel();
+    loadLevelPromise
+      .then(workLeve2 => {
+        if (workLeve2 === null) {
+          workLeve2 = 'Beginner';
+        }
+        setLevel(workLeve2);
+        if (level === 'Beginner') {
+          setTime(1200);
+        } else if (level === 'Standard') {
+          setTime(180);
+        } else if (level === 'Expert') {
+          setTime(180);
+        } else {
+          setTime(1200);
+        }
+        setGameState(prevGameState => {
+          let workBoard = JSON.parse(JSON.stringify(newBoard));
+          let randomNumberIndex = Math.floor(Math.random() * 63);
+          let randomNumber = Math.floor(Math.random() * 25);
+          let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
+          randomNumberIndex = Math.floor(Math.random() * 63);
+          randomNumber = Math.floor(Math.random() * 25);
+          randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+          randomNumberIndex = Math.floor(Math.random() * 63);
+          randomNumber = Math.floor(Math.random() * 25);
+          randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+          console.log('reset level', level);
+          return {
+            message: 'Enter 1st letter',
+            score: 0,
+            board: JSON.parse(JSON.stringify(eLL.board)),
+            previousBoard: [],
+          };
+        });
+      })
+      .catch(err => console.log('err', err));
   }, []);
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
     if (score === 0) {
-      let workLevel = 'xxxx';
+      let workLevel = '';
       if (level === 'Beginner') {
         setLevel('Standard');
         setTime(180);
@@ -115,7 +123,7 @@ export default function App() {
         setLevel('Default');
         setTime(1200);
         workLevel = 'Beginner';
-      };
+      }
       setLevelStorage(workLevel);
     }
   }, [level]);
@@ -131,7 +139,7 @@ export default function App() {
         message: workMessage,
       };
     });
-  }, [board,time]);
+  }, [board, time]);
 
   // set level in local storage
   const setLevelStorage = async level => {
@@ -148,7 +156,7 @@ export default function App() {
   // get highscore
   const getHighScores = async () => {
     let highScores = await AsyncStorage.getItem('highScoresList');
-    return highScores
+    return highScores;
   };
 
   // LOAD board if previously saved
@@ -177,11 +185,11 @@ export default function App() {
   const loadTime = useCallback(async () => {
     let savedTime = await AsyncStorage.getItem('timeLeft');
     setTime(prevTime => {
-      let workTime = JSON.parse(JSON.stringify(time));
+      let workTime = JSON.parse(JSON.stringify(prevTime));
       if (savedTime !== null) {
         workTime = JSON.parse(savedTime);
       }
-      return workTime
+      return workTime;
     });
   }, []);
 
@@ -223,39 +231,36 @@ export default function App() {
 
   // Load previously saved Level if it exists
   const loadLevel = async () => {
-    let workLeve2 = await AsyncStorage.getItem('level');   
-   return workLeve2;
+    let workLeve2 = await AsyncStorage.getItem('level');
+    return workLeve2;
   };
 
   // Load Level on app startup and store level in state
   // Set and update timer
   useEffect(() => {
-    loadLevel().then( workLeve2 => { 
+    loadLevel().then(workLeve2 => {
       if (workLeve2 === null) {
-        workLeve2 = "Beginner";
-      }; 
-      let workTime = 0;     
-      setLevel(workLeve2);
+        workLeve2 = 'Beginner';
+      }
       if (workLeve2 === 'Beginner') {
-        workTime = 1200;
+        setTime(1200);
       } else if (workLeve2 === 'Standard') {
-        workTime = 180;
+        setTime(180);
       } else if (workLeve2 === 'Expert') {
-        workTime = 180;
+        setTime(180);
       } else {
-        workTime = 1200;
-      };
-      setTime(workTime);
+        setTime(1200);
+      }
+      setLevel(workLeve2);
       let interval = null;
-      console.log('useEffect Time',time, workTime);
-     if (timerOn && time > 0) {
-       interval = setInterval(() => {
-         setTime(prevTime => prevTime - 1);
-       }, 1000);
-     } else {
-       clearInterval(interval);
-     }
-     return () => clearInterval(interval);
+      if (time > 0) {
+        interval = setInterval(() => {
+          setTime(prevTime => prevTime - 1);
+        }, 1000);
+      } else {
+        clearInterval(interval);
+      }
+      return () => clearInterval(interval);
     });
   }, []);
 
@@ -265,8 +270,8 @@ export default function App() {
     removeBoard();
     loadTime();
     removeTime();
- //   removeHighScores();
- //   removeLevel();
+    //   removeHighScores();
+    //   removeLevel();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -285,17 +290,17 @@ export default function App() {
   const pressAlert = () => {
     let alertMessage1;
     let alertMessage2 = '';
-    return getHighScores().then((highScores) => {
+    return getHighScores().then(highScores => {
       if (highScores === null) {
         highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
-      };
+      }
       for (let { date: d, score: s, level: l } of JSON.parse(highScores)) {
         alertMessage1 = d + '---' + s + '---' + l + ' ' + '  ';
         alertMessage2 = alertMessage2 + alertMessage1;
       }
       const alertMessage3 =
-        '\n\nOnly 3-letter words defined in the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.'
-        + 'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game.';
+        '\n\nOnly 3-letter words defined in the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.' +
+        'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game.';
       const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
       Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
     });
@@ -478,7 +483,7 @@ export default function App() {
       }
     }
     // Determine if extra time should be awarded based on points accumulated
-    workMessage = rewardExtraTime();
+    workMessage = rewardExtraTime(workScore);
     // If no other messages have been generated, issue this generic one
     if (workMessage === '') {
       workMessage = 'Enter next Letter';
@@ -495,22 +500,22 @@ export default function App() {
         level: level,
       };
       updateHighScores(recentScore);
-    };    
-      return {
-        message: workMessage,
-        score: workScore,
-        board: workBoard,
-        previousBoard: workPreviousBoard,
-      };
+    }
+    return {
+      message: workMessage,
+      score: workScore,
+      board: workBoard,
+      previousBoard: workPreviousBoard,
+    };
   };
 
   // updateHighScores function
-  const updateHighScores = (recentScore) => {
+  const updateHighScores = recentScore => {
     // Get previous highScores from storage
-    getHighScores().then((highScores) => {
+    getHighScores().then(highScores => {
       if (highScores === null) {
         highScores = '[{"date":"1900-01-01","score":0,"level":"xxxxxx"}]';
-      };
+      }
       let highScoresOld = JSON.parse(highScores);
       highScoresOld.push(recentScore);
       // Sort highScores and take top 5 scores
@@ -519,49 +524,48 @@ export default function App() {
       // Store new list of highScores
       let setHighScoresPromise = setHighScores(highScoresOld);
       setHighScoresPromise
-        .then(highScores => { 
+        .then(highScores => {
           return;
-         })
-        .catch(err => console.log('err', err));  
-    })
+        })
+        .catch(err => console.log('err', err));
+    });
   };
 
   // reward extra time based on score
-  const rewardExtraTime = () => {
+  const rewardExtraTime = workScore => {
     let workMessage = '';
-     if (level === 'Standard') {
-        if (score > 24 && previousScore < 25) {
-          workMessage = 'You are awarded 40 extra seconds';
-          setPreviousScore(score);
-          setTime( prevTime => prevTime + 40);
-        } else if (score > 49 && previousScore < 50) {
-          workMessage = 'You are awarded 40 extra seconds';
-          setPreviousScore(score);
-          setTime(prevTime => prevTime + 40);
-        } else if (score > 74 && previousScore < 75) {
-          workMessage = 'You are awarded 40 extra seconds';
-          setPreviousScore(score);
-          setTime(prevTime => prevTime + 40);
-        }
-      }; 
-      if (level === 'Expert') {
-        if (score > 24 && previousScore < 25) {
-          workMessage = 'You are awarded 20 extra seconds';
-          setPreviousScore(score);
-          setTime(prevTime => prevTime + 20);
-        } else if (score > 49 && previousScore < 50) {
-          workMessage = 'You are awarded 20 extra seconds';
-          setPreviousScore(score);
-          setTime(prevTime => prevTime + 20);
-        } else if (score > 74 && previousScore < 75) {
-          workMessage = 'You are awarded 20 extra seconds';
-          setPreviousScore(score);
-          setTime(prevTime => prevTime + 20);
-        }
-      }; 
-      return workMessage;
+    if (level === 'Standard') {
+      if (workScore > 24 && previousScore < 25) {
+        workMessage = 'You are awarded 40 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 40);
+      } else if (workScore > 49 && previousScore < 50) {
+        workMessage = 'You are awarded 40 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 40);
+      } else if (workScore > 74 && previousScore < 75) {
+        workMessage = 'You are awarded 40 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 40);
+      }
+    }
+    if (level === 'Expert') {
+      if (workScore > 24 && previousScore < 25) {
+        workMessage = 'You are awarded 20 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 20);
+      } else if (workScore > 49 && previousScore < 50) {
+        workMessage = 'You are awarded 20 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 20);
+      } else if (workScore > 74 && previousScore < 75) {
+        workMessage = 'You are awarded 20 extra seconds';
+        setPreviousScore(workScore);
+        setTime(prevTime => prevTime + 20);
+      }
+    }
+    return workMessage;
   };
-
 
   // Enter a Letter from keyboard
   // - calls enterLetterLogic which has detailed logic
