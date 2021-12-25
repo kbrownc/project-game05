@@ -39,6 +39,7 @@ export default function App() {
     previousBoard: [],
   });
   const [time, setTime] = useState(300);
+  const [timerOn, setTimerOn] = useState(true);
   const [level, setLevel] = useState('*init*');
   const [previousScore, setPreviousScore] = useState(0);
 
@@ -91,6 +92,7 @@ export default function App() {
           randomNumber = Math.floor(Math.random() * 25);
           randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
           eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+          setTimerOn(true);
           console.log('reset level', level);
           return {
             message: 'Enter 1st letter',
@@ -236,7 +238,6 @@ export default function App() {
   };
 
   // Load Level on app startup and store level in state
-  // Set and update timer
   useEffect(() => {
     loadLevel().then(workLeve2 => {
       if (workLeve2 === null) {
@@ -252,17 +253,22 @@ export default function App() {
         setTime(1200);
       }
       setLevel(workLeve2);
-      let interval = null;
-      if (time > 0) {
-        interval = setInterval(() => {
-          setTime(prevTime => prevTime - 1);
-        }, 1000);
-      } else {
-        clearInterval(interval);
-      }
-      return () => clearInterval(interval);
     });
   }, []);
+
+  // Set and update timer
+  useEffect(() => {
+    let interval = null;
+    if (timerOn && time > 0) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime - 1);
+        if (time < 0) setTimerOn(false);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timerOn,time]);
 
   // Load random letters in random spots when app loads
   useEffect(() => {
@@ -270,6 +276,7 @@ export default function App() {
     removeBoard();
     loadTime();
     removeTime();
+    // These 2 functions are only run for testing purposes
     //   removeHighScores();
     //   removeLevel();
     let randomNumberIndex = Math.floor(Math.random() * 63);
