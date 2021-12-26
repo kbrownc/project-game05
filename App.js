@@ -68,6 +68,7 @@ export default function App() {
         if (workLeve2 === null) {
           workLeve2 = 'Beginner';
         }
+        console.log('reset workLeve2', workLeve2);
         setLevel(workLeve2);
         if (level === 'Beginner') {
           setTime(1200);
@@ -103,7 +104,7 @@ export default function App() {
         });
       })
       .catch(err => console.log('err', err));
-  }, []);
+  }, [level]);
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
@@ -248,7 +249,7 @@ export default function App() {
       } else if (workLeve2 === 'Standard') {
         setTime(180);
       } else if (workLeve2 === 'Expert') {
-        setTime(180);
+        setTime(120);
       } else {
         setTime(1200);
       }
@@ -501,6 +502,7 @@ export default function App() {
       // Create score for current round
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      console.log('enterletter level',level);
       const recentScore = {
         date: date.toString(),
         score: workScore,
