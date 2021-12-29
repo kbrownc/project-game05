@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { globalStyles } from './global';
 import { wordDictionary } from './WordDictionary';
 import { letterPoints } from './LetterPoints';
@@ -14,7 +14,6 @@ import {
   AsyncStorage,
 } from 'react-native';
 
-const DEV = true;
 const numColumns = 8;
 const numRows = 8;
 
@@ -26,6 +25,7 @@ AsyncStorage.getAllKeys((err, keys) => {
   AsyncStorage.multiGet(keys, (error, stores) => {
     stores.map((result, i, store) => {
       console.log('AsyncStorage', { [store[i][0]]: store[i][1] });
+      console.log('-----------------------------------------------');
       return true;
     });
   });
@@ -39,6 +39,7 @@ export default function App() {
     previousBoard: [],
   });
   const [time, setTime] = useState(300);
+  const [timerOn, setTimerOn] = useState(true);
   const [level, setLevel] = useState('*init*');
   const [previousScore, setPreviousScore] = useState(0);
 
@@ -60,37 +61,48 @@ export default function App() {
 
   // press Reset button
   const pressReset = useCallback(() => {
-    if (level === 'Beginner') {
-      setTime(1200);
-    } else if (level === 'Standard') {
-      setTime(180);
-    } else if (level === 'Expert') {
-      setTime(180);
-    } else {
-      setTime(1200);
-    }
-    setGameState(prevGameState => {
-      let workBoard = JSON.parse(JSON.stringify(newBoard));
-      let randomNumberIndex = Math.floor(Math.random() * 63);
-      let randomNumber = Math.floor(Math.random() * 25);
-      let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
-      randomNumberIndex = Math.floor(Math.random() * 63);
-      randomNumber = Math.floor(Math.random() * 25);
-      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
-      randomNumberIndex = Math.floor(Math.random() * 63);
-      randomNumber = Math.floor(Math.random() * 25);
-      randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
-      eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
-      return {
-        message: 'Enter 1st letter',
-        score: 0,
-        board: JSON.parse(JSON.stringify(eLL.board)),
-        previousBoard: [],
-      };
-    })
-  }, [level,time]);
+    console.log('Reset');
+    let loadLevelPromise = loadLevel();
+    loadLevelPromise
+      .then(workLeve2 => {
+        if (workLeve2 === null) {
+          workLeve2 = 'Beginner';
+        }
+        setLevel(workLeve2);
+        if (level === 'Beginner') {
+          setTime(1200);
+        } else if (level === 'Standard') {
+          setTime(180);
+        } else if (level === 'Expert') {
+          setTime(180);
+        } else {
+          setTime(1200);
+        }
+        setGameState(prevGameState => {
+          let workBoard = JSON.parse(JSON.stringify(newBoard));
+          let randomNumberIndex = Math.floor(Math.random() * 63);
+          let randomNumber = Math.floor(Math.random() * 25);
+          let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          let eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, workBoard);
+          randomNumberIndex = Math.floor(Math.random() * 63);
+          randomNumber = Math.floor(Math.random() * 25);
+          randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+          randomNumberIndex = Math.floor(Math.random() * 63);
+          randomNumber = Math.floor(Math.random() * 25);
+          randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
+          eLL = enterLetterLogic(randomNumberValue, randomNumberIndex, eLL.board);
+          setTimerOn(true);
+          return {
+            message: 'Enter 1st letter',
+            score: 0,
+            board: JSON.parse(JSON.stringify(eLL.board)),
+            previousBoard: [],
+          };
+        });
+      })
+      .catch(err => console.log('err', err));
+  }, [level]);
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
@@ -115,7 +127,7 @@ export default function App() {
       }
       setLevelStorage(workLevel);
     }
-  }, [level,score,time]);
+  }, [level]);
 
   // Save board/time in progress
   const pressSave = useCallback(async () => {
@@ -168,7 +180,7 @@ export default function App() {
         board: JSON.parse(JSON.stringify(workBoard)),
       };
     });
-  }, [board,enterLetterLogic]);
+  }, []);
 
   // LOAD Time if previously saved
   const loadTime = useCallback(async () => {
@@ -180,7 +192,7 @@ export default function App() {
       }
       return workTime;
     });
-  }, [time]);
+  }, []);
 
   // Remove previously saved board if it exists
   const removeBoard = async () => {
@@ -212,7 +224,7 @@ export default function App() {
   // Remove previously saved highScoresList if it exists (for testing purposes only) ************
   const removeHighScores = async () => {
     try {
-      await AsyncStorage.removeItem('highScoresList');
+      await AsyncStorage.removeItem('highScoresList').then(() => console.log('removeHighScores has run'));
     } catch (err) {
       alert(err);
     }
@@ -240,28 +252,23 @@ export default function App() {
         setTime(1200);
       }
       setLevel(workLeve2);
-    })
-    .catch(err => console.error('err', err));
+      console.log('useEffect workLeve2 level',workLeve2,level);
+    });
   }, []);
 
   // Set and update timer
-  const interval = useRef(null);
   useEffect(() => {
-    interval.current = setInterval(() => {
-      setTime(prevTime => prevTime - 1);
-    }, 1000);
-    return () => {
-      clearInterval(interval.current);
-      interval.current = null;
+    let interval = null;
+    if (timerOn && time > 0) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime - 1);
+        if (time < 0) setTimerOn(false);
+      }, 1000);
+    } else {
+      clearInterval(interval);
     }
-  }, []);
-
-  useEffect(() => {
-    if (time <= 0) {
-      clearInterval(interval.current);
-      interval.current = null;
-    }
-  }, [time])
+    return () => clearInterval(interval);
+  }, [timerOn,time]);
 
   // Load random letters in random spots when app loads
   useEffect(() => {
@@ -303,8 +310,7 @@ export default function App() {
         'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game.';
       const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
       Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
-    })
-    .catch(err => console.error('err', err));
+    });
   };
 
   // enterLetterLogic function
@@ -315,7 +321,8 @@ export default function App() {
   //      Need to update score
   //    previousBoard - an array listing what the board looked like after the previous turn
   //    wordList - list of the 3-letter words on the board
-  const enterLetterLogic = useCallback((value, item, tempBoard) => {
+  const enterLetterLogic = (value, item, tempBoard) => {
+    console.log('enterLetterLogic level a',level);
     let workBoard = JSON.parse(JSON.stringify(tempBoard));
     let workPreviousBoard = JSON.parse(JSON.stringify(tempBoard));
     let workMessage = '';
@@ -495,6 +502,7 @@ export default function App() {
       // Create score for current round
       let today = new Date();
       let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      console.log('enterLetterLogic level b',level);
       const recentScore = {
         date: date.toString(),
         score: workScore,
@@ -508,7 +516,7 @@ export default function App() {
       board: workBoard,
       previousBoard: workPreviousBoard,
     };
-  }, [message,score,board,previousBoard,level]);
+  };
 
   // updateHighScores function
   const updateHighScores = recentScore => {
@@ -528,9 +536,8 @@ export default function App() {
         .then(highScores => {
           return;
         })
-        .catch(err => console.error('err', err));
-    })
-    .catch(err => console.error('err', err));
+        .catch(err => console.log('err', err));
+    });
   };
 
   // reward extra time based on score
@@ -582,7 +589,7 @@ export default function App() {
         previousBoard: eLL.previousBoard,
       };
     });
-  }, [enterLetterLogic]);
+  }, []);
 
   // render
   return (
