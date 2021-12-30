@@ -22,14 +22,14 @@ let newBoard = new Array(numColumns * numRows).fill('');
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Dump out AsyncStorage
-AsyncStorage.getAllKeys((err, keys) => {
-  AsyncStorage.multiGet(keys, (error, stores) => {
-    stores.map((result, i, store) => {
-      console.log('AsyncStorage', { [store[i][0]]: store[i][1] });
-      return true;
-    });
-  });
-});
+// AsyncStorage.getAllKeys((err, keys) => {
+//   AsyncStorage.multiGet(keys, (error, stores) => {
+//     stores.map((result, i, store) => {
+//       console.log;('AsyncStorage', { [store[i][0]]: store[i][1] });
+//       return true;
+//     });
+//   });
+// });
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
@@ -60,6 +60,7 @@ export default function App() {
 
   // press Reset button
   const pressReset = useCallback(() => {
+    setPreviousScore(0);
     if (level === 'Beginner') {
       setTime(1200);
     } else if (level === 'Standard') {
@@ -90,7 +91,7 @@ export default function App() {
         previousBoard: [],
       };
     })
-  }, [level,time]);
+  }, [level,time,previousScore,score]);
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
@@ -246,15 +247,17 @@ export default function App() {
 
   // Set and update timer
   const interval = useRef(null);
+  
   useEffect(() => {
     interval.current = setInterval(() => {
       setTime(prevTime => prevTime - 1);
     }, 1000);
+    // return in useeffect cleans up function
     return () => {
       clearInterval(interval.current);
       interval.current = null;
     }
-  }, []);
+  }, [score]);
 
   useEffect(() => {
     if (time <= 0) {
@@ -490,7 +493,7 @@ export default function App() {
       workMessage = 'Enter next Letter';
     }
     // End of Game check
-    if (workBoard.indexOf(' ') === -1 || workScore > 5) {
+    if (workBoard.indexOf(' ') === -1) {
       workMessage = 'Game completed';
       // Create score for current round
       let today = new Date();
