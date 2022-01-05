@@ -42,6 +42,8 @@ export default function App() {
   const [level, setLevel] = useState('Beginner');
   const [previousScore, setPreviousScore] = useState(0);
 
+  const interval = useRef(null);
+
   // render board
   const renderBoard = ({ item, index }) => {
     return (
@@ -66,10 +68,11 @@ export default function App() {
     } else if (level === 'Standard') {
       setTime(180);
     } else if (level === 'Expert') {
-      setTime(180);
+      setTime(18);
     } else {
       setTime(1200);
     }
+    startTimer();
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(newBoard));
       let randomNumberIndex = Math.floor(Math.random() * 63);
@@ -92,6 +95,21 @@ export default function App() {
       };
     });
   }, [level, time, previousScore, score]);
+
+  // Startup timer
+  const startTimer = useCallback(() => {
+    if (interval.current === null) {
+      interval.current = setInterval(() => {
+        setTime(prevTime => prevTime - 1);
+        if (time <= 0) {
+          clearInterval(interval.current);
+          interval.current = null;
+        }
+        console.log('Reset setInterval',interval.current);
+      }, 1000);
+    }
+  }, [time, interval.current]);
+
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
@@ -237,7 +255,7 @@ export default function App() {
         } else if (workLeve2 === 'Standard') {
           setTime(180);
         } else if (workLeve2 === 'Expert') {
-          setTime(120);
+          setTime(12);
         } else {
           setTime(1200);
         }
@@ -246,19 +264,17 @@ export default function App() {
       .catch(err => console.error('err', err));
   }, []);
 
-  // Set and update timer
-  const interval = useRef(null);
-
   useEffect(() => {
     interval.current = setInterval(() => {
       setTime(prevTime => prevTime - 1);
+      console.log('useEffect setInterval',interval.current);
     }, 1000);
     // return in useeffect cleans up function
     return () => {
       clearInterval(interval.current);
       interval.current = null;
     };
-  }, [score, time]);
+  }, []);
 
   useEffect(() => {
     if (time <= 0) {
@@ -305,7 +321,9 @@ export default function App() {
         }
         const alertMessage3 =
           '\n\nOnly 3-letter words defined in the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.' +
-          'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game.';
+          'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game. Your score does not het added to the list of ' +
+          'high scores unless ALL red squares are filled in with a letter.';
+
         const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
         Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
       })
