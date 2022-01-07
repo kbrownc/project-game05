@@ -103,7 +103,6 @@ export default function App() {
     }, 1000);
   }, [time, interval.current]);
 
-
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
     if (score === 0) {
@@ -133,17 +132,15 @@ export default function App() {
   const pressSave = useCallback(async () => {
     await AsyncStorage.setItem('Board', JSON.stringify(board));
     await AsyncStorage.setItem('timeLeft', JSON.stringify(time));
-
-    // Create score for current round
-        let today = new Date();
-        let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        const recentScore = {
-          date: date.toString(),
-          score: score,
-          level: level,
-        };
-        updateHighScores(recentScore);
-
+    // Save score for current round if in the top 5.
+    let today = new Date();
+    let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    const recentScore = {
+      date: date.toString(),
+      score: score,
+      level: level,
+    };
+    updateHighScores(recentScore);
     setGameState(prevGameState => {
       let workMessage = 'Game saved';
       return {
@@ -293,8 +290,8 @@ export default function App() {
     loadTime();
     removeTime();
     // These 2 functions are only run for testing purposes
-        // removeHighScores();
-        // removeLevel();
+    // removeHighScores();
+    // removeLevel();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -325,7 +322,7 @@ export default function App() {
         const alertMessage3 =
           '\n\nOnly 3-letter words defined in the Webster dictionary are allowed and get you points. The red squares are the only squares you can enter a letter into and represent all of your valid moves. No duplicate words are allowed. Words cannot lie along side another. The SAVE button allow to store the current board for future use which will load automatically at the next session you play.' +
           'Each letter has a weighted score which is used to calculate the score of a word. The game has a timer, the starting value (plus bonus seconds) are a function of the difficult you have selected. Your top 5 scores are saved with the difficulty and the date you played that game. Game difficulty cannot be changed in the middle of a game. Your score does not het added to the list of ' +
-          'high scores unless ALL red squares are filled in with a letter.';
+          'high scores unless ALL red squares are filled in with a letter. Be careful, the wrong word choices could cause to not be able to finish a game.';
 
         const alertMessage = JSON.stringify(alertMessage2) + alertMessage3;
         Alert.alert('Your Top 5 scores/How to Play', alertMessage, [{ text: 'understood' }]);
