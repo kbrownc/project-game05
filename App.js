@@ -133,6 +133,17 @@ export default function App() {
   const pressSave = useCallback(async () => {
     await AsyncStorage.setItem('Board', JSON.stringify(board));
     await AsyncStorage.setItem('timeLeft', JSON.stringify(time));
+
+    // Create score for current round
+        let today = new Date();
+        let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        const recentScore = {
+          date: date.toString(),
+          score: score,
+          level: level,
+        };
+        updateHighScores(recentScore);
+
     setGameState(prevGameState => {
       let workMessage = 'Game saved';
       return {
@@ -282,8 +293,8 @@ export default function App() {
     loadTime();
     removeTime();
     // These 2 functions are only run for testing purposes
-    // removeHighScores();
-    // removeLevel();
+        // removeHighScores();
+        // removeLevel();
     let randomNumberIndex = Math.floor(Math.random() * 63);
     let randomNumber = Math.floor(Math.random() * 25);
     let randomNumberValue = alphabet.substring(randomNumber, randomNumber + 1);
@@ -506,7 +517,7 @@ export default function App() {
         workMessage = 'Enter next Letter';
       }
       // End of Game check
-      if (workBoard.indexOf(' ') === -1 || score > 1) {
+      if (workBoard.indexOf(' ') === -1) {
         workMessage = 'Game completed';
         // Create score for current round
         let today = new Date();
@@ -533,12 +544,6 @@ export default function App() {
     // Get previous highScores from storage
     getHighScores()
       .then(highScores => {
-        // if (highScores === null) {
-        //   highScores = '[{"date":"1900-01-01","score":0,"level":"empty list"}]';
-        // }
-        // let highScoresOld = JSON.parse(highScores);
-        // highScoresOld.push(recentScore);
-
         let highScoresOld;
         if (highScores === null) {
           highScores = '[]';
