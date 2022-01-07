@@ -68,11 +68,11 @@ export default function App() {
     } else if (level === 'Standard') {
       setTime(180);
     } else if (level === 'Expert') {
-      setTime(18);
+      setTime(180);
     } else {
       setTime(1200);
     }
-    startTimer();
+    if (time === 0) startTimer();
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(newBoard));
       let randomNumberIndex = Math.floor(Math.random() * 63);
@@ -98,16 +98,9 @@ export default function App() {
 
   // Startup timer
   const startTimer = useCallback(() => {
-    if (interval.current === null) {
-      interval.current = setInterval(() => {
-        setTime(prevTime => prevTime - 1);
-        if (time <= 0) {
-          clearInterval(interval.current);
-          interval.current = null;
-        }
-        console.log('Reset setInterval',interval.current);
-      }, 1000);
-    }
+    interval.current = setInterval(() => {
+      setTime(prevTime => prevTime - 1);
+    }, 1000);
   }, [time, interval.current]);
 
 
@@ -255,7 +248,7 @@ export default function App() {
         } else if (workLeve2 === 'Standard') {
           setTime(180);
         } else if (workLeve2 === 'Expert') {
-          setTime(12);
+          setTime(180);
         } else {
           setTime(1200);
         }
@@ -267,7 +260,6 @@ export default function App() {
   useEffect(() => {
     interval.current = setInterval(() => {
       setTime(prevTime => prevTime - 1);
-      console.log('useEffect setInterval',interval.current);
     }, 1000);
     // return in useeffect cleans up function
     return () => {
