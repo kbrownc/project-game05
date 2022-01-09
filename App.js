@@ -62,6 +62,7 @@ export default function App() {
 
   // press Reset button
   const pressReset = useCallback(() => {
+    console.log('Reset');
     setPreviousScore(0);
     if (level === 'Beginner') {
       setTime(1200);
@@ -72,7 +73,7 @@ export default function App() {
     } else {
       setTime(1200);
     }
-    if (time === 0) startTimer();
+    // if (time === 0) startTimer();
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(newBoard));
       let randomNumberIndex = Math.floor(Math.random() * 63);
@@ -100,8 +101,9 @@ export default function App() {
   const startTimer = useCallback(() => {
     interval.current = setInterval(() => {
       setTime(prevTime => prevTime - 1);
+      console.log(Date());
     }, 1000);
-  }, [time, interval.current]);
+  }, []);
 
   // Update Level if button is pressed
   const pressLevel = useCallback(() => {
@@ -267,7 +269,8 @@ export default function App() {
 
   useEffect(() => {
     interval.current = setInterval(() => {
-      setTime(prevTime => prevTime - 1);
+      setTime(prevTime => prevTime > 0 ? prevTime - 1 : prevTime);
+      console.log(Date());
     }, 1000);
     // return in useeffect cleans up function
     return () => {
@@ -276,12 +279,12 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (time <= 0) {
-      clearInterval(interval.current);
-      interval.current = null;
-    }
-  }, [time]);
+  // useEffect(() => {
+  //   if (time <= 0) {
+  //     clearInterval(interval.current);
+  //     interval.current = null;
+  //   }
+  // }, [time]);
 
   // Load random letters in random spots when app loads
   useEffect(() => {
