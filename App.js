@@ -436,7 +436,7 @@ export default function App() {
                   workBoard[i + 3] = '';
                 }
               } else {
-                workMessage = 'Duplicate word - word rejected - ' + word;
+                workMessage = 'Duplicate word - ' + word;
                 workBoard = workPreviousBoard;
               }
             }
@@ -486,7 +486,7 @@ export default function App() {
                   workBoard[i * numColumns + j + numRows * 3] = '';
                 }
               } else {
-                workMessage = 'Duplicate word - word rejected - ' + word;
+                workMessage = 'Duplicate word - ' + word;
                 workBoard = workPreviousBoard;
               }
             }
@@ -494,7 +494,11 @@ export default function App() {
         }
       }
       // Determine if extra time should be awarded based on points accumulated
-      workMessage = rewardExtraTime(workScore);
+      let workMessage2 = '';
+      workMessage2 = rewardExtraTime(workScore);
+      if (workMessage2 !== '') {
+        workMessage = workMessage2;
+      }
       // If no other messages have been generated, issue this generic one
       if (workMessage === '') {
         workMessage = 'Enter next Letter';
