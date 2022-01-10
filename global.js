@@ -38,12 +38,12 @@ export const globalStyles = StyleSheet.create({
   },
   itemText: {
     color: '#fff',
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: 'bold',
   },
   itemText1: {
     color: '#fff',
-    fontSize: 25,
+    fontSize: 10,
     fontWeight: 'bold',
   },
   message: {
@@ -51,7 +51,7 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'column',
     color: 'black',
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -60,7 +60,7 @@ export const globalStyles = StyleSheet.create({
   },
   board: {
     flex: 7,
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     marginVertical: 1,
   },
