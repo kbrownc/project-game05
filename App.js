@@ -66,7 +66,7 @@ export default function App() {
     if (level === 'Beginner') {
       setTime(1200);
     } else if (level === 'Standard') {
-      setTime(180);
+      setTime(249);
     } else if (level === 'Expert') {
       setTime(180);
     } else {
@@ -101,7 +101,7 @@ export default function App() {
       let workLevel = '';
       if (level === 'Beginner') {
         setLevel('Standard');
-        setTime(180);
+        setTime(240);
         workLevel = 'Standard';
       } else if (level === 'Standard') {
         setLevel('Expert');
@@ -169,7 +169,7 @@ export default function App() {
       let workMessage = prevGameState.message;
       if (savedBoard !== null) {
         workBoard = JSON.parse(savedBoard);
-        workMessage = 'Previous game loaded';
+        workMessage = 'Old game loaded';
         let eLL = enterLetterLogic(' ', 0, workBoard);
         workScore = eLL.score;
       }
@@ -246,7 +246,7 @@ export default function App() {
         if (workLeve2 === 'Beginner') {
           setTime(1200);
         } else if (workLeve2 === 'Standard') {
-          setTime(180);
+          setTime(240);
         } else if (workLeve2 === 'Expert') {
           setTime(180);
         } else {
@@ -407,7 +407,7 @@ export default function App() {
           ) {
             word = workBoard[i] + workBoard[i + 1] + workBoard[i + 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-              workMessage = 'Word not found - ' + word;
+              workMessage = 'Not found - ' + word;
               workBoard = workPreviousBoard;
             } else {
               if (wordList[word] === undefined) {
@@ -436,7 +436,7 @@ export default function App() {
                   workBoard[i + 3] = '';
                 }
               } else {
-                workMessage = 'Duplicate word - ' + word;
+                workMessage = 'Duplicate - ' + word;
                 workBoard = workPreviousBoard;
               }
             }
@@ -459,7 +459,7 @@ export default function App() {
               workBoard[i * numColumns + j + numRows] +
               workBoard[i * numColumns + j + numRows * 2];
             if (wordDictionary.indexOf(word.toLowerCase()) === -1) {
-              workMessage = 'Word not found - ' + word;
+              workMessage = 'Not found - ' + word;
               workBoard = workPreviousBoard;
             } else {
               if (wordList[word] === undefined) {
@@ -486,7 +486,7 @@ export default function App() {
                   workBoard[i * numColumns + j + numRows * 3] = '';
                 }
               } else {
-                workMessage = 'Duplicate word - ' + word;
+                workMessage = 'Duplicate - ' + word;
                 workBoard = workPreviousBoard;
               }
             }

@@ -38,7 +38,7 @@ export const globalStyles = StyleSheet.create({
   },
   itemText: {
     color: '#fff',
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
   },
   itemText1: {
