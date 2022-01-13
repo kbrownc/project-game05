@@ -40,6 +40,7 @@ export const globalStyles = StyleSheet.create({
     color: '#fff',
     fontSize: 25,
     fontWeight: 'bold',
+    textAlignVertical: 'center',
   },
   itemText1: {
     color: '#fff',
@@ -60,10 +61,8 @@ export const globalStyles = StyleSheet.create({
   },
   board: {
     flex: 7,
-    fontSize: 15,
     fontWeight: 'bold',
-    marginVertical: 1,
-    textAlignVertical: 'center',
+    marginVertical: 0,
   },
   itemRed: {
     backgroundColor: 'red',
