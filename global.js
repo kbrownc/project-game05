@@ -63,7 +63,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     marginVertical: 1,
-    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   itemRed: {
     backgroundColor: 'red',
