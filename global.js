@@ -4,12 +4,15 @@ import {StyleSheet, Dimensions,} from 'react-native';
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 55,
+    marginTop: 50,
   },
   nav: {
-    flex: 0,
+    flex: .5,
     fontWeight: 'bold',
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    textAlignVertical: 'center',
+    margin: 1,
   },
   input: {
     width: 50,
@@ -21,6 +24,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   item: {
+    flex: 1,
     backgroundColor: 'blue',
     alignItems: 'center',
     justifyContent: 'center',
@@ -29,14 +33,18 @@ export const globalStyles = StyleSheet.create({
     height: Dimensions.get('window').width / 8,
   },
   itemNav: {
+    flex: 1,
     backgroundColor: 'red',
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    margin: 1,
-    height: 45,
+    margin: 2,
+    height: 35,
+    textAlignVertical: 'center',
   },
   itemText: {
+    flex: 1,
+    alignItems: 'center',
     color: '#fff',
     fontSize: 25,
     fontWeight: 'bold',
@@ -44,7 +52,7 @@ export const globalStyles = StyleSheet.create({
   },
   itemText1: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   message: {
@@ -52,9 +60,10 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'column',
     color: 'black',
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    textAlignVertical: 'center',
   },
   messageRow: {
     flex: 1,

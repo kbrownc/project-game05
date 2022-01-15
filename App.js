@@ -33,7 +33,7 @@ const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export default function App() {
   const [{ message, score, board, previousBoard }, setGameState] = useState({
-    message: 'Enter 1st letter',
+    message: '3Letter Game',
     score: 0,
     board: JSON.parse(JSON.stringify(newBoard)),
     previousBoard: [],
@@ -64,13 +64,13 @@ export default function App() {
   const pressReset = useCallback(() => {
     setPreviousScore(0);
     if (level === 'Beginner') {
-      setTime(1200);
+      setTime(600);
     } else if (level === 'Standard') {
-      setTime(249);
+      setTime(240);
     } else if (level === 'Expert') {
       setTime(180);
     } else {
-      setTime(1200);
+      setTime(600);
     }
     setGameState(prevGameState => {
       let workBoard = JSON.parse(JSON.stringify(newBoard));
@@ -109,11 +109,11 @@ export default function App() {
         workLevel = 'Expert';
       } else if (level === 'Expert') {
         setLevel('Beginner');
-        setTime(1200);
+        setTime(600);
         workLevel = 'Beginner';
       } else {
         setLevel('Beginner');
-        setTime(1200);
+        setTime(600);
         workLevel = 'Beginner';
       }
       setLevelStorage(workLevel);
@@ -244,13 +244,13 @@ export default function App() {
           workLeve2 = 'Beginner';
         }
         if (workLeve2 === 'Beginner') {
-          setTime(1200);
+          setTime(600);
         } else if (workLeve2 === 'Standard') {
           setTime(240);
         } else if (workLeve2 === 'Expert') {
           setTime(180);
         } else {
-          setTime(1200);
+          setTime(600);
         }
         setLevel(workLeve2);
       })
@@ -616,25 +616,24 @@ export default function App() {
     >
       <View style={globalStyles.container}>
         <View style={globalStyles.nav}>
-          <Button onPress={pressReset} title="Reset" color="green" />
+          <View style={globalStyles.messageRow}>
+            <Text style={globalStyles.message}>{message}</Text>
+          </View>
+        </View>
+        <View style={globalStyles.nav}>
           <View style={globalStyles.itemNav}>
-            <Text style={globalStyles.itemText1}>
+            <Text style={globalStyles.itemText1}>Time:
               {Math.floor(time / 60) + ':' + ('0' + Math.floor(time % 60)).slice(-2)}
             </Text>
           </View>
           <View style={globalStyles.itemNav}>
-            <Text style={globalStyles.itemText1}>Score</Text>
+            <Text style={globalStyles.itemText1}>Score: {score}</Text>
           </View>
-          <View style={globalStyles.itemNav}>
-            <Text style={globalStyles.itemText1}>{score}</Text>
-          </View>
-          <Button onPress={pressSave} title="Save" color="green" />
-          <Button onPress={pressAlert} title="About" color="green" />
         </View>
         <View style={globalStyles.nav}>
-          <View style={globalStyles.messageRow}>
-            <Text style={globalStyles.message}>{message}</Text>
-          </View>
+          <Button onPress={pressReset} title="Reset" color="green" />
+          <Button onPress={pressSave} title="Save" color="green" />
+          <Button onPress={pressAlert} title="About" color="green" />
           <Button onPress={pressLevel} title={level} color="green" />
         </View>
         <View style={globalStyles.board}>
