@@ -338,6 +338,7 @@ export default function App() {
       // add letter to board (if value = ' ' then this is only to calculate score)
       if (value !== ' ') {
         workBoard[item] = value.trim();
+        Keyboard.dismiss();
       }
       // mark squares on board that can be used (both sides of letter)
       //  - rows
