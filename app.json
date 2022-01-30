@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "project-game05",
-    "slug": "project-game05",
+    "name": "3Letter",
+    "slug": "3-Letter",
+    "description": "This game has you enter 3 letter words with a time constraint.",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/3letter-icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
